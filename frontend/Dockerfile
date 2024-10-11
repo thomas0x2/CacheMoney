@@ -9,5 +9,5 @@ FROM base AS service
 COPY . /app
 
 # Set startup command
-CMD ["yarn", "start"]
+CMD ["npm", "start"]
 

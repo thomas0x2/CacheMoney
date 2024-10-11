@@ -26,7 +26,7 @@ services:
       dockerfile: ./Dockerfile
     expose:
       - 3000
-    command: [ "sh", "-c", "yarn install && yarn start" ]
+    command: [ "sh", "-c", "npm install && npm start" ]
     working_dir: /app
     volumes:
       - ./frontend:/app
