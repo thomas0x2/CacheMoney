@@ -1,0 +1,50 @@
+.App-Header {
+    text-align: center;
+    background-color: #282c34;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    padding: 0 20px;
+
+    .Logo {
+        height: 30vmin;
+        pointer-events: none;
+    }
+
+    @media (prefers-reduced-motion: no-preference) {
+        .Logo {
+            animation: Header-logo-spin infinite 20s linear;
+        }
+    }
+
+    .Spacer {
+        height: 40px;
+    }
+
+    .Title {
+        font-size: calc(10px + 3vmin);
+    }
+
+    .Text {
+        font-size: calc(10px + 1.3vmin);
+        max-width: 600px;
+        text-align: left;
+    }
+
+    .Link {
+        color: #61dafb;
+        text-decoration: none;
+    }
+}
+
+@keyframes Header-logo-spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}

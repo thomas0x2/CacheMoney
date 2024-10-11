@@ -1,0 +1,52 @@
+version: "3"
+services:
+
+  backend:
+    container_name: hack-backend
+    build:
+      context: ./backend/
+      dockerfile: ./Dockerfile
+    expose:
+      - 5000
+    working_dir: /app
+    volumes:
+      - ./backend:/app
+    labels:
+      traefik.enable: true
+      traefik.http.routers.backend.entrypoints: web
+      traefik.http.routers.backend.rule: PathPrefix(`/api`)
+      traefik.http.services.backend.loadbalancer.server.port: 5000
+    restart: unless-stopped
+
+
+  frontend:
+    container_name: hack-frontend
+    build:
+      context: ./frontend/
+      dockerfile: ./Dockerfile
+    expose:
+      - 3000
+    command: [ "sh", "-c", "yarn install && yarn start" ]
+    working_dir: /app
+    volumes:
+      - ./frontend:/app
+    labels:
+      traefik.enable: true
+      traefik.http.routers.frontend.entrypoints: web
+      traefik.http.routers.frontend.rule: PathPrefix(`/`)
+      traefik.http.services.frontend.loadbalancer.server.port: 3000
+    restart: unless-stopped
+
+  traefik:
+    image: traefik
+    container_name: traefik
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    command:
+      - --api.insecure=true
+      - --providers.docker=true
+      - --entrypoints.web.address=:80
+    ports:
+      - 80:80
+      - 8080:8080
+    restart: unless-stopped
