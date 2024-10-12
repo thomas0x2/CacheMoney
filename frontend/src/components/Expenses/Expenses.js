@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Button, Form, Container, Row, Col, Card, InputGroup, FormControl } from 'react-bootstrap';
+import React, { useState, useEffect, useRef } from 'react';
+import { Button, Form, Container, Row, Col, Card, InputGroup, FormControl, Spinner } from 'react-bootstrap';
 import TopbarNav from '../TopbarNav/TopbarNav';
 import BreadcrumbAndProfile from '../BreadcrumbAndProfile/BreadcrumbAndProfile';
 import * as XLSX from 'xlsx';
@@ -15,6 +15,7 @@ function Expenses() {
     const savedExpenses = localStorage.getItem('expenses');
     return savedExpenses ? JSON.parse(savedExpenses) : [];
   });
+  const [searchQuery, setSearchQuery] = useState('');
   const [expense, setExpense] = useState({
     name: '',
     amount: '',
@@ -28,7 +29,12 @@ function Expenses() {
   const [addOption, setAddOption] = useState(null);
   const [dateOption, setDateOption] = useState('today');
   const [file, setFile] = useState(null);
+  const [isLoading, setIsLoading] = useState(false); // For loading indicator
+  const [errorMessage, setErrorMessage] = useState(null); // For error handling
   const categories = ['Utility', 'Rent', 'Groceries', 'Entertainment', 'Other'];
+
+  const videoRef = useRef(null); // Ref for video element to show camera stream
+  const canvasRef = useRef(null); // Ref for canvas to capture image from video
 
   useEffect(() => {
     localStorage.setItem('expenses', JSON.stringify(expenses));
@@ -37,12 +43,15 @@ function Expenses() {
   const exportToExcel = () => {
     const ws = XLSX.utils.json_to_sheet(expenses);
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Expenses");gereectBNDHE6Jqz4pO6CmwiPH9Hna1
+    XLSX.utils.book_append_sheet(wb, ws, "Expenses");
     XLSX.writeFile(wb, "Expenses.xlsx");
   };
 
   const handleOptionClick = (option) => {
     setAddOption(option);
+    if (option === 'camera') {
+      startCamera();
+    }
   };
 
   const handleEdit = (expense) => {
@@ -119,34 +128,37 @@ function Expenses() {
     }
   };
 
-  // Add missing handleFileChange function
   const handleFileChange = (event) => {
     const selectedFile = event.target.files[0];
     setFile(selectedFile); // Set the selected file in state
     console.log('File selected:', selectedFile);
   };
 
-  // Add handleFileSubmit for submitting the image
   const handleFileSubmit = () => {
     if (!file) {
       alert('Please select a file before submitting.');
       return;
     }
-
+  
     const formData = new FormData();
     formData.append('file', file);
-
+  
+    // Show loading spinner
+    setIsLoading(true);
+    setErrorMessage(null);
+  
     fetch('/api/upload', {
       method: 'POST',
       body: formData,
     })
     .then(response => response.json())
     .then(data => {
+      setIsLoading(false); // Hide loading spinner after request
       if (data.error) {
-        alert('Error: ' + data.error);
+        setErrorMessage(data.error); // Set error message
       } else {
         console.log('File successfully submitted. Extracted data:', data);
-
+  
         // Add the returned data to expenses
         const newExpense = {
           id: Date.now(), // You can replace this with a proper unique ID if needed
@@ -157,13 +169,36 @@ function Expenses() {
           status: "DUE", // Assuming "DUE" for newly added expenses
           category: 'Other' // You can assign a default or a dynamic category
         };
-
+  
         setExpenses(prevExpenses => [...prevExpenses, newExpense]);
       }
     })
     .catch(error => {
-      console.error('Error during file submission:', error);
+      setIsLoading(false);
+      setErrorMessage('Error during file submission: ' + error.message); // Display error
     });
+  };
+
+  const startCamera = () => {
+    navigator.mediaDevices.getUserMedia({ video: true })
+      .then((stream) => {
+        videoRef.current.srcObject = stream;
+        videoRef.current.play();
+      })
+      .catch((err) => {
+        setErrorMessage("Error accessing the camera: " + err.message);
+      });
+  };
+
+  const captureImage = () => {
+    const context = canvasRef.current.getContext('2d');
+    context.drawImage(videoRef.current, 0, 0, canvasRef.current.width, canvasRef.current.height);
+
+    // Convert canvas to blob (image file)
+    canvasRef.current.toBlob((blob) => {
+      const capturedImageFile = new File([blob], "captured_image.jpg", { type: "image/jpeg" });
+      setFile(capturedImageFile); // Set the captured image as the file
+    }, "image/jpeg");
   };
 
   const totalExpense = expenses.reduce((total, exp) => total + parseFloat(exp.amount), 0);
@@ -222,7 +257,8 @@ function Expenses() {
           <InputGroup className="mb-3">
             <FormControl
               placeholder="Search expenses..."
-              onChange={(e) => setSearchQuery(e.target.value)}
+              value={searchQuery} // Bind input to searchQuery state
+              onChange={(e) => setSearchQuery(e.target.value)} // Update searchQuery state on input
             />
           </InputGroup>
 
@@ -250,6 +286,10 @@ function Expenses() {
               </div>
             </Col>
           </Row>
+
+          {/* Show loading spinner or error message */}
+          {isLoading && <div><Spinner animation="border" /> Submitting...</div>}
+          {errorMessage && <div className="text-danger">{errorMessage}</div>}
 
           {/* Buttons for different add expense options */}
           <div className="d-flex justify-content-between mt-4 mb-3 button-group">
@@ -391,7 +431,14 @@ function Expenses() {
               <Button onClick={handleFileSubmit} className="mt-3 primary-button">Submit Picture</Button>
             </div>
           )}
-
+          
+          {addOption === 'camera' && (
+            <div>
+              <video ref={videoRef} style={{ width: '100%' }} />
+              <canvas ref={canvasRef} style={{ display: 'none' }} width="640" height="480" />
+              <Button onClick={captureImage} className="mt-3 primary-button">Capture and Submit Picture</Button>
+            </div>
+          )}
         </Col>
       </Row>
     </Container>

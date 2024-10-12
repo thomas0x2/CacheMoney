@@ -55,23 +55,16 @@ def process_image(image_path):
         # Step 3: Prepare the prompt for Mistral to extract bill info
         prompt = f"""
         Extract the following information from the provided image of a bill:
-        1. Name of the expense
-        2. Amount of the expense
+        1. Total price or total amount of expense as a number!
+        2. Name of the expense
         3. Date of the bill
         4. A short description of the expense
+        5. Category of the bill with the options: ['Utility', 'Rent', 'Groceries', 'Entertainment', 'Other']
 
-        Return the extracted information in the following JSON format:
+        Return the extracted information with the following JSON fields:
+        "amount", "name", "date", "description", "category"
 
-        {{
-          "name": "Expense Name",
-          "amount": "Amount",
-          "date": "Date",
-          "description": "Short description",
-          "status": "DUE",
-          "category": "Other"
-        }}
-
-        Here is the encoded image in Base64: {base64_image}
+        Here is a picture of the bill: {base64_image}
         """
 
         # Step 4: Call the Mistral API
