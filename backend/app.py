@@ -4,6 +4,7 @@ from flask_cors import CORS  # Import CORS
 import firebase_admin
 from firebase_admin import credentials, firestore
 from datetime import datetime, timedelta
+import calendar
 
 import os
 from werkzeug.utils import secure_filename
@@ -15,6 +16,7 @@ from config import API_KEY, MODEL_ID
 
 import logging
 logging.basicConfig(level=logging.DEBUG)
+from dateutil.relativedelta import relativedelta
 
 # Set up Mistral API client
 client = Mistral(api_key=API_KEY)
@@ -171,6 +173,88 @@ def get_all_expenses():
             })
 
         return jsonify({"expenses": expenses_list}), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/monthly-income', methods=['GET'])
+def get_monthly_income():
+    try:
+        # Get the 'userid' from the query parameters
+        userid = request.args.get('userid')
+
+        if not userid:
+            return jsonify({"error": "Missing 'userid' in query parameters"}), 400
+
+        # Get the current date
+        now = datetime.now()
+
+        # Get the first and last day of the current month
+        first_day_of_month = datetime(now.year, now.month, 1)
+        last_day_of_month = datetime(now.year, now.month, calendar.monthrange(now.year, now.month)[1])
+
+        # Initialize total for monthly income
+        total_monthly_income = 0
+
+        ### Query Firestore for incomes in the current month
+        income_ref = db.collection('users').document(userid).collection('income')
+        income_query = income_ref.where('Date', '>=', first_day_of_month).where('Date', '<=', last_day_of_month)
+        incomes = income_query.stream()
+
+        # Sum up the total monthly income
+        for income in incomes:
+            income_data = income.to_dict()
+            total_monthly_income += income_data.get('Amount', 0)
+
+        # Return the total income for the current month
+        return jsonify({
+            "total_monthly_income": total_monthly_income
+        }), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/monthly-income-last6months', methods=['GET'])
+def get_monthly_income_last_6_months():
+    try:
+        # Get the 'userid' from the query parameters
+        userid = request.args.get('userid')
+
+        if not userid:
+            return jsonify({"error": "Missing 'userid' in query parameters"}), 400
+
+        # Initialize a dictionary to store income for the last 6 months
+        monthly_income = {}
+
+        # Get the current date
+        now = datetime.now()
+
+        # Loop through the last 6 months
+        for i in range(6):
+            # Get the first day of the current month (offset by i months)
+            current_month = now - relativedelta(months=i)
+            first_day_of_month = datetime(current_month.year, current_month.month, 1)
+            last_day_of_month = datetime(current_month.year, current_month.month, calendar.monthrange(current_month.year, current_month.month)[1])
+
+            # Initialize total for the month's income
+            total_monthly_income = 0
+
+            ### Query Firestore for incomes within the current month
+            income_ref = db.collection('users').document(userid).collection('income')
+            income_query = income_ref.where('Date', '>=', first_day_of_month).where('Date', '<=', last_day_of_month)
+            incomes = income_query.stream()
+
+            # Sum up the total income for the current month
+            for income in incomes:
+                income_data = income.to_dict()
+                total_monthly_income += income_data.get('Amount', 0)
+
+            # Add the total monthly income to the dictionary
+            month_key = f"{current_month.year}-{current_month.month:02d}"  # E.g., "2024-10"
+            monthly_income[month_key] = total_monthly_income
+
+        # Return the aggregated monthly income for the last 6 months
+        return jsonify(monthly_income), 200
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
