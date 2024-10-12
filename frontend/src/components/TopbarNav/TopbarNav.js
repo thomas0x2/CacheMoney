@@ -35,6 +35,7 @@ function TopNavbar({ username, role }) {
         <Navbar.Collapse id="basic-navbar-nav">
           <Nav className="me-auto align-items-center">
             <Nav.Link as={Link} to="/dashboard">Dashboard</Nav.Link>
+            <Nav.Link as={Link} to="/savings">Savings</Nav.Link>
             <Nav.Link as={Link} to="/incomes">Income</Nav.Link>
             <Nav.Link as={Link} to="/expenses">Expenses</Nav.Link>
           </Nav>
