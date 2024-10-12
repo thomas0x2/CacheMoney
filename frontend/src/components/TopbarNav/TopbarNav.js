@@ -38,6 +38,7 @@ function TopNavbar({ username, role }) {
             <Nav.Link as={Link} to="/savings">Savings</Nav.Link>
             <Nav.Link as={Link} to="/incomes">Income</Nav.Link>
             <Nav.Link as={Link} to="/expenses">Expenses</Nav.Link>
+            <Nav.Link as={Link} to="/assistant">Assistant</Nav.Link>
           </Nav>
           <div className="d-flex align-items-center">
             <div className="profile d-flex align-items-center me-3">

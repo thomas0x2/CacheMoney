@@ -6,6 +6,7 @@ import Incomes from "./components/Incomes/Incomes";
 import Expenses from "./components/Expenses/Expenses";
 import SignOut from "./components/SignOut/SignOut";
 import Savings from "./components/Savings/Savings";
+import Assistant from "./components/Assistant/Assistant"; // Import the new Assistant page
 import AuthenticatedRoute from "./components/Auth/AuthenticatedRoute";
 import { UserProvider } from "./components/Auth/UserContext";
 import "./App.css";
@@ -92,6 +93,14 @@ function App() {
             />
             <Route path="/signout" element={<SignOut />} />
             <Route path="/savings" element={<Savings />} />
+            <Route
+              path="/assistant"
+              element={
+                <AuthenticatedRoute>
+                  <Assistant /> {/* New Assistant route */}
+                </AuthenticatedRoute>
+              }
+            />
           </Routes>
         </Router>
       </UserProvider>
