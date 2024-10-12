@@ -1,18 +1,30 @@
-import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import 'bootstrap/dist/css/bootstrap.min.css';
-import './SignIn.css';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEnvelope, faLock, faArrowRight, faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
-import { faGoogle } from '@fortawesome/free-brands-svg-icons';
+import React, { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import "bootstrap/dist/css/bootstrap.min.css";
+import "./SignIn.css";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faEnvelope,
+  faLock,
+  faArrowRight,
+  faEye,
+  faEyeSlash,
+} from "@fortawesome/free-solid-svg-icons";
+import { faGoogle } from "@fortawesome/free-brands-svg-icons";
+
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "../../firebase";
+
+import { getAuth, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
+const gProvider = new GoogleAuthProvider();
 
 function SignIn() {
   const navigate = useNavigate();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState({ email: '', password: '' });
+  const [error, setError] = useState({ email: "", password: "" });
 
   const validateForm = () => {
     let formIsValid = true;
@@ -20,44 +32,73 @@ function SignIn() {
 
     // Example validation logic
     if (!email) {
-      errors.email = 'Email is required';
+      errors.email = "Email is required";
       formIsValid = false;
     } else if (!/\S+@\S+\.\S+/.test(email)) {
-      errors.email = 'Email is invalid';
+      errors.email = "Email is invalid";
       formIsValid = false;
     }
 
     if (!password) {
-      errors.password = 'Password is required';
+      errors.password = "Password is required";
       formIsValid = false;
     } else if (password.length < 6) {
-      errors.password = 'Password must be at least 6 characters';
+      errors.password = "Password must be at least 6 characters";
       formIsValid = false;
     }
 
     setError(errors);
     return formIsValid;
-  }
+  };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     setLoading(true);
     if (validateForm()) {
-      console.log('Form is valid');
+      console.log("Form is valid");
       // Simulate an API call
-      setTimeout(() => {
-        setLoading(false);
-        navigate('/dashboard');
-      }, 2000);
+      signInWithEmailAndPassword(auth, email, password)
+        .then((userCredential) => {
+          // Signed in
+          const user = userCredential.user;
+          navigate("/dashboard");
+          console.log(user);
+        })
+        .catch((error) => {
+          const errorCode = error.code;
+          const errorMessage = error.message;
+          console.log(errorCode, errorMessage);
+        });
     } else {
-      console.log('Form has errors');
+      console.log("Form has errors");
       setLoading(false);
     }
-  }
+  };
 
   const handleGoogleLogin = () => {
-    console.log('Logging in with Google');
-    navigate('/dashboard');
+    console.log("Logging in with Google");
+    const auth = getAuth();
+    signInWithPopup(auth, gProvider)
+      .then((result) => {
+        // This gives you a Google Access Token. You can use it to access the Google API.
+        const credential = GoogleAuthProvider.credentialFromResult(result);
+        const token = credential.accessToken;
+        // The signed-in user info.
+        const user = result.user;
+        // IdP data available using getAdditionalUserInfo(result)
+        // ...
+        navigate("/dashboard");
+      })
+      .catch((error) => {
+        // Handle Errors here.
+        const errorCode = error.code;
+        const errorMessage = error.message;
+        // The email of the user's account used.
+        const email = error.customData.email;
+        // The AuthCredential type that was used.
+        const credential = GoogleAuthProvider.credentialFromError(error);
+        // ...
+      });
   };
 
   const togglePasswordVisibility = () => {
@@ -65,60 +106,76 @@ function SignIn() {
   };
 
   return (
-<div className="signin">
-  <div className="signin-container">
-    <div className="text-center">
-        <p>Log in to <span className="bold-text">Bee Finance</span></p>
-    </div>
-    <div className="form-group">
-      <button className="btn-fullwidth" onClick={handleGoogleLogin}>
-          <FontAwesomeIcon icon={faGoogle} className="icon" />
-          Login with Google
-        </button>
-    </div>
-    <form onSubmit={handleSubmit}>
-    <div className="form-group input-icon-container">
-      <FontAwesomeIcon icon={faEnvelope} className="input-icon" />
-      <input
-      type="email"
-      className={`form-control ${error.email ? 'is-invalid' : ''}`}
-      placeholder="Your email"
-      aria-label="Email"
-      value={email}
-      onChange={(e) => setEmail(e.target.value)}
-      required
-      />
-      {error.email && <div className="invalid-feedback">{error.email}</div>}
-    </div>
-    <div className="form-group input-icon-container">
-      <FontAwesomeIcon icon={faLock} className="input-icon" />
-      <input
-      type={showPassword ? "text" : "password"}
-      className={`form-control ${error.password ? 'is-invalid' : ''}`}
-      placeholder="Your password"
-      aria-label="Password"
-      value={password}
-      onChange={(e) => setPassword(e.target.value)}
-      required
-      />
-      <FontAwesomeIcon icon={showPassword ? faEyeSlash : faEye} className="toggle-password" onClick={togglePasswordVisibility} />
-      {error.password && <div className="invalid-feedback">{error.password}</div>}
-    </div>
-
+    <div className="signin">
+      <div className="signin-container">
+        <div className="text-center">
+          <p>
+            Log in to <span className="bold-text">Bee Finance</span>
+          </p>
+        </div>
         <div className="form-group">
-          <button type="submit" className="btn-login" disabled={loading}>
-            Log in <FontAwesomeIcon icon={faArrowRight} />
+          <button className="btn-fullwidth" onClick={handleGoogleLogin}>
+            <FontAwesomeIcon icon={faGoogle} className="icon" />
+            Login with Google
           </button>
         </div>
-        {loading && <div>Loading...</div>}
-      </form>
-      <div className="text-center">
-      <Link to="/dashboard" className="forgot-password dark-link">Forgot password?</Link>
-      <p>Don’t have an account? <Link to="/dashboard" className="dark-link">Sign up</Link></p>
+        <form onSubmit={handleSubmit}>
+          <div className="form-group input-icon-container">
+            <FontAwesomeIcon icon={faEnvelope} className="input-icon" />
+            <input
+              type="email"
+              className={`form-control ${error.email ? "is-invalid" : ""}`}
+              placeholder="Your email"
+              aria-label="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+            {error.email && (
+              <div className="invalid-feedback">{error.email}</div>
+            )}
+          </div>
+          <div className="form-group input-icon-container">
+            <FontAwesomeIcon icon={faLock} className="input-icon" />
+            <input
+              type={showPassword ? "text" : "password"}
+              className={`form-control ${error.password ? "is-invalid" : ""}`}
+              placeholder="Your password"
+              aria-label="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+            <FontAwesomeIcon
+              icon={showPassword ? faEyeSlash : faEye}
+              className="toggle-password"
+              onClick={togglePasswordVisibility}
+            />
+            {error.password && (
+              <div className="invalid-feedback">{error.password}</div>
+            )}
+          </div>
+
+          <div className="form-group">
+            <button type="submit" className="btn-login" disabled={loading}>
+              Log in <FontAwesomeIcon icon={faArrowRight} />
+            </button>
+          </div>
+          {loading && <div>Loading...</div>}
+        </form>
+        <div className="text-center">
+          <Link to="/dashboard" className="forgot-password dark-link">
+            Forgot password?
+          </Link>
+          <p>
+            Don’t have an account?{" "}
+            <Link to="/dashboard" className="dark-link">
+              Sign up
+            </Link>
+          </p>
+        </div>
       </div>
     </div>
-  </div>
-
   );
 }
 
