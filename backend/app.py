@@ -139,19 +139,3 @@ def encode_image(image_path):
 
 if __name__ == "__main__":
     app.run(debug=True)
-
-
-# if __name__ == "__main__":
-#     print("Starting server")
-#     app.run(debug=True)
-from flask import Flask
-
-app = Flask(__name__)
-
-@app.route('/')
-def home():
-    return "Server is running!"
-
-if __name__ == '__main__':
-    # Start the Flask server
-    app.run(host='0.0.0.0', port=5000, debug=True)
