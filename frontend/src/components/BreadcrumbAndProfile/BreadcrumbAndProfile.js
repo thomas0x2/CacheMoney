@@ -7,11 +7,11 @@ function BreadcrumbAndProfile({ username, role, breadcrumbItems, pageTitle }) {
   let welcomeMessage = `Welcome, ${username}`;
   let financialStatusSummary = "Here's a summary of your financial status.";
 
-  if (pageTitle === 'Incomes') {
+  if (pageTitle === "Incomes") {
     welcomeMessage = `${username}, here are your incomes...`;
-  } else if (pageTitle === 'Expenses') {
+  } else if (pageTitle === "Expenses") {
     welcomeMessage = `${username}, here are your expenses...`;
-  } else if (pageTitle === 'Dashboard') {
+  } else if (pageTitle === "Dashboard") {
     welcomeMessage = `Welcome back, ${username}`;
     financialStatusSummary = "At the current rate, you will reach your saving target in X days";
   } else if (pageTitle === 'Set Target') {

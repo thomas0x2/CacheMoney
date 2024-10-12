@@ -10,7 +10,7 @@ import {
   InputGroup,
   FormControl,
 } from "react-bootstrap";
-import SidebarNav from "../SidebarNav/SidebarNav";
+import TopbarNav from "../TopbarNav/TopbarNav";
 import BreadcrumbAndProfile from "../BreadcrumbAndProfile/BreadcrumbAndProfile";
 import IncomeForm from "./IncomeForm";
 import IncomeTable from "./IncomeTable";
@@ -173,10 +173,10 @@ function Incomes() {
 
   return (
     <Container fluid>
+      <Row className="topbar">
+          <TopbarNav username="Nerit Küneşko" role="Entrepreneur"/>
+      </Row>
       <Row>
-        <Col md={2} className="sidebar">
-          <SidebarNav />
-        </Col>
         <Col md={10} className="main">
           <BreadcrumbAndProfile
             username="Nerit Küneşko"
