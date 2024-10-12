@@ -1,26 +1,20 @@
 // src/components/AuthenticatedRoute.js
 
-import React, { useEffect } from "react";
+import React, { useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import { onAuthStateChanged } from "firebase/auth";
-import { auth } from "../../firebase"; // Ensure correct import path based on your project structure
+import { UserContext } from "./UserContext"; // Import the UserContext
 
 const AuthenticatedRoute = ({ children }) => {
   const navigate = useNavigate();
+  const user = useContext(UserContext); // Access the current user from context
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (!user) {
-        // If the user is not authenticated, redirect to the login page
-        navigate("/");
-      }
-    });
+  // Redirect to login if no user is authenticated
+  if (!user) {
+    navigate("/"); // Redirect to login or homepage
+    return null; // Don't render children if not authenticated
+  }
 
-    // Clean up the listener on component unmount
-    return () => unsubscribe();
-  }, [navigate]);
-
-  return <>{children}</>; // Render the children (protected components) if user is authenticated
+  return <>{children}</>; // Render protected children if authenticated
 };
 
 export default AuthenticatedRoute;
