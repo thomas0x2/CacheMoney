@@ -1,35 +1,33 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Form, ListGroup, Container, Row, Col, Card, InputGroup, FormControl } from 'react-bootstrap';
+import { Button, Form, Container, Row, Col, Card, InputGroup, FormControl } from 'react-bootstrap';
 import TopbarNav from '../TopbarNav/TopbarNav';
-import SidebarNav from '../SidebarNav/SidebarNav';
 import BreadcrumbAndProfile from '../BreadcrumbAndProfile/BreadcrumbAndProfile';
 import * as XLSX from 'xlsx';
 import { Chart as ChartJS } from 'chart.js/auto';
 import { Line } from 'react-chartjs-2';
 import 'chartjs-adapter-date-fns';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faFileExcel, faArrowCircleLeft, faArrowCircleRight, faPlusCircle, faPenToSquare, faTrashCan } from '@fortawesome/free-solid-svg-icons';
+import { faFileExcel, faPlusCircle, faCamera, faImage } from "@fortawesome/free-solid-svg-icons";
 import { motion } from 'framer-motion';
-import { faCamera, faImage } from "@fortawesome/free-solid-svg-icons";
 
 function Expenses() {
   const [expenses, setExpenses] = useState(() => {
     const savedExpenses = localStorage.getItem('expenses');
     return savedExpenses ? JSON.parse(savedExpenses) : [];
   });
-  const [name, setName] = useState('');
-  const [amount, setAmount] = useState('');
-  const [date, setDate] = useState('');
-  const [description, setDescription] = useState('');
-  const [isPaid, setIsPaid] = useState(false);
+  const [expense, setExpense] = useState({
+    name: '',
+    amount: '',
+    date: '',
+    description: '',
+    isPaid: false,
+    category: ''
+  });
   const [editing, setEditing] = useState(false);
   const [currentExpense, setCurrentExpense] = useState(null);
-  const [category, setCategory] = useState('');
-  const [currentPage, setCurrentPage] = useState(1);
-  const [expensesPerPage] = useState(5);
-  const [searchQuery, setSearchQuery] = useState('');
   const [addOption, setAddOption] = useState(null);
-
+  const [dateOption, setDateOption] = useState('today');
+  const [file, setFile] = useState(null);
   const categories = ['Utility', 'Rent', 'Groceries', 'Entertainment', 'Other'];
 
   useEffect(() => {
@@ -39,7 +37,7 @@ function Expenses() {
   const exportToExcel = () => {
     const ws = XLSX.utils.json_to_sheet(expenses);
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Expenses");
+    XLSX.utils.book_append_sheet(wb, ws, "Expenses");gereectBNDHE6Jqz4pO6CmwiPH9Hna1
     XLSX.writeFile(wb, "Expenses.xlsx");
   };
 
@@ -50,85 +48,132 @@ function Expenses() {
   const handleEdit = (expense) => {
     setEditing(true);
     setCurrentExpense(expense);
-    setName(expense.name);
-    setAmount(expense.amount);
-    setDate(expense.date);
-    setDescription(expense.description);
-    setIsPaid(expense.status === "PAID");
-    setCategory(expense.category || '');
+    setExpense(expense);
+    setDateOption('custom');
     setAddOption('manual'); // Automatically open manual form when editing
+  };
+
+  const resetForm = () => {
+    setExpense({
+      name: '',
+      amount: '',
+      date: '',
+      description: '',
+      isPaid: false,
+      category: ''
+    });
+    setEditing(false);
+    setCurrentExpense(null);
+    setDateOption('today');
+    setAddOption(null);
+  };
+
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setExpense(prev => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value
+    }));
+  };
+
+  const handleDateChange = (option) => {
+    setDateOption(option);
+    if (option === 'today') {
+      setExpense(prev => ({ ...prev, date: new Date().toISOString().split('T')[0] }));
+    } else if (option === 'yesterday') {
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      setExpense(prev => ({ ...prev, date: yesterday.toISOString().split('T')[0] }));
+    } else {
+      setExpense(prev => ({ ...prev, date: '' })); // Custom date requires user input
+    }
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!name || !amount || !date || !description || !category) {
+    if (!expense.name || !expense.amount || !expense.date || !expense.category) {
       alert("All fields are required, including the category.");
       return;
     }
-    const isConfirmed = window.confirm(editing ? "Are you sure you want to update this expense?" : "Are you sure you want to add this expense?");
-    if (!isConfirmed) {
-      return;
-    }
 
-    const expenseData = {
-      id: editing ? currentExpense.id : Date.now(),
-      name,
-      amount,
-      date,
-      description,
-      status: isPaid ? "PAID" : "DUE",
-      category,
+    const newExpense = {
+      ...expense,
+      amount: parseFloat(expense.amount),
+      status: expense.isPaid ? "PAID" : "DUE",
+      id: editing ? currentExpense.id : Date.now()
     };
 
     if (editing) {
-      setExpenses(expenses.map(expense => expense.id === currentExpense.id ? expenseData : expense));
+      setExpenses(expenses.map(exp => exp.id === currentExpense.id ? newExpense : exp));
     } else {
-      setExpenses([...expenses, expenseData]);
+      setExpenses([...expenses, newExpense]);
     }
 
     resetForm();
   };
 
-  const resetForm = () => {
-    setName('');
-    setAmount('');
-    setDate('');
-    setDescription('');
-    setIsPaid(false);
-    setEditing(false);
-    setCurrentExpense(null);
-    setCategory('');
-    setAddOption(null);
-  };
-
-  const handleFileChange = (event) => {
-    // Handle file selection
-    const file = event.target.files[0];
-    // You can add logic here to process the file
-    console.log('File selected:', file);
-  };
-
-  const handleFileSubmit = () => {
-    // Handle file submission
-    // You can add logic here to process and submit the file
-    console.log('File submitted');
-  };
-
   const handleRemove = (id) => {
     const isConfirmed = window.confirm("Are you sure you want to remove this expense?");
     if (isConfirmed) {
-      setExpenses(expenses.filter(expense => expense.id !== id));
+      setExpenses(expenses.filter(exp => exp.id !== id));
     }
   };
 
-  const totalExpense = expenses.reduce((total, expense) => total + parseFloat(expense.amount), 0);
+  // Add missing handleFileChange function
+  const handleFileChange = (event) => {
+    const selectedFile = event.target.files[0];
+    setFile(selectedFile); // Set the selected file in state
+    console.log('File selected:', selectedFile);
+  };
+
+  // Add handleFileSubmit for submitting the image
+  const handleFileSubmit = () => {
+    if (!file) {
+      alert('Please select a file before submitting.');
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    fetch('/api/upload', {
+      method: 'POST',
+      body: formData,
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.error) {
+        alert('Error: ' + data.error);
+      } else {
+        console.log('File successfully submitted. Extracted data:', data);
+
+        // Add the returned data to expenses
+        const newExpense = {
+          id: Date.now(), // You can replace this with a proper unique ID if needed
+          name: data.name,
+          amount: data.amount,
+          date: data.date,
+          description: data.description,
+          status: "DUE", // Assuming "DUE" for newly added expenses
+          category: 'Other' // You can assign a default or a dynamic category
+        };
+
+        setExpenses(prevExpenses => [...prevExpenses, newExpense]);
+      }
+    })
+    .catch(error => {
+      console.error('Error during file submission:', error);
+    });
+  };
+
+  const totalExpense = expenses.reduce((total, exp) => total + parseFloat(exp.amount), 0);
 
   const chartData = {
-    labels: expenses.map(expense => new Date(expense.date)),
+    labels: expenses.map(exp => new Date(exp.date)),
     datasets: [
       {
         label: 'Total Expenses',
-        data: expenses.map(expense => expense.amount),
+        data: expenses.map(exp => exp.amount),
         fill: false,
         backgroundColor: 'rgba(75,192,192,0.2)',
         borderColor: 'rgba(75,192,192,1)',
@@ -161,13 +206,13 @@ function Expenses() {
   return (
     <Container fluid>
       <Row className="topbar">
-          <TopbarNav username="Nerit Küneşko" role="Entrepreneur"/>
+        <TopbarNav username="Nerit Küneşko" role="Entrepreneur" />
       </Row>
       <Row>
         <Col md={10} className="main">
-          <BreadcrumbAndProfile 
-            username="Nerit Küneşko" 
-            role="Entrepreneur" 
+          <BreadcrumbAndProfile
+            username="Nerit Küneşko"
+            role="Entrepreneur"
             pageTitle="Expenses"
             breadcrumbItems={[
               { name: 'Dashboard', path: '/dashboard', active: false },
@@ -212,7 +257,7 @@ function Expenses() {
               Add through Google Wallet
               <FontAwesomeIcon icon={faPlusCircle} className="icon-right" />
             </Button>
-            
+
             <Button variant="secondary" className="mt-3 primary-button" onClick={() => handleOptionClick('camera')}>
               Add through Camera
               <FontAwesomeIcon icon={faCamera} className="icon-right" />
@@ -232,54 +277,110 @@ function Expenses() {
           {/* Conditional rendering based on the selected option */}
           {addOption === 'manual' && (
             <Form onSubmit={handleSubmit}>
-              {/* Manual Form Fields */}
               <Row className="grid-row">
-                <Col md={4}>
+                <Col md={6}>
                   <Form.Group>
-                    <Form.Label>Name</Form.Label>
-                    <Form.Control type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Expense Name" required />
+                    <Form.Control
+                      type="text"
+                      placeholder="Expense Name"
+                      name="name"
+                      value={expense.name}
+                      onChange={handleChange}
+                      required
+                    />
                   </Form.Group>
                 </Col>
-                <Col md={4}>
+                <Col md={6}>
                   <Form.Group>
-                    <Form.Label>Description</Form.Label>
-                    <Form.Control type="text" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Short description" required />
-                  </Form.Group>
-                </Col>
-                <Col md={4}>
-                  <Form.Group>
-                    <Form.Label>Amount</Form.Label>
-                    <Form.Control type="number" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="Expense Amount in CHF" required />
+                    <Form.Control
+                      type="number"
+                      placeholder="Amount (CHF)"
+                      name="amount"
+                      value={expense.amount}
+                      onChange={handleChange}
+                      required
+                    />
                   </Form.Group>
                 </Col>
               </Row>
-              <Row className="grid-row">
-                <Col md={4}>
-                  <Form.Group>
-                    <Form.Label>Date</Form.Label>
-                    <Form.Control type="date" value={date} onChange={(e) => setDate(e.target.value)} required />
-                  </Form.Group>
-                </Col>
-                <Col md={4}>
-                  <Form.Group>
-                    <Form.Label>Category</Form.Label>
-                    <Form.Select value={category} onChange={(e) => setCategory(e.target.value)}>
-                      <option value="">Select a category</option>
-                      {categories.map((cat, index) => (
-                        <option key={index} value={cat}>{cat}</option>
-                      ))}
-                    </Form.Select>
-                  </Form.Group>
-                </Col>
-                <Col md={4} className="d-flex align-items-center">
-                  <Form.Group>
-                    <Form.Check type="checkbox" label="Paid" checked={isPaid} onChange={(e) => setIsPaid(e.target.checked)} />
-                  </Form.Group>
-                </Col>
-              </Row>
-              <Button type="submit" className="mt-3 primary-button">
+
+              <Form.Group>
+                <Form.Label>Select Date</Form.Label>
+                <Row className="mb-3">
+                  <Col>
+                    <Button
+                      variant={dateOption === 'today' ? 'primary' : 'outline-primary'}
+                      onClick={() => handleDateChange('today')}
+                    >
+                      Today
+                    </Button>
+                  </Col>
+                  <Col>
+                    <Button
+                      variant={dateOption === 'yesterday' ? 'primary' : 'outline-primary'}
+                      onClick={() => handleDateChange('yesterday')}
+                    >
+                      Yesterday
+                    </Button>
+                  </Col>
+                  <Col>
+                    <Button
+                      variant={dateOption === 'custom' ? 'primary' : 'outline-primary'}
+                      onClick={() => handleDateChange('custom')}
+                    >
+                      Custom
+                    </Button>
+                  </Col>
+                </Row>
+
+                {dateOption === 'custom' && (
+                  <Form.Control
+                    type="date"
+                    name="date"
+                    value={expense.date}
+                    onChange={handleChange}
+                    required
+                  />
+                )}
+              </Form.Group>
+
+              <Form.Group>
+                <Form.Control
+                  as="textarea"
+                  rows={3}
+                  placeholder="Description (optional)"
+                  name="description"
+                  value={expense.description}
+                  onChange={handleChange}
+                />
+              </Form.Group>
+
+              <Form.Group>
+                <Form.Control
+                  as="select"
+                  name="category"
+                  value={expense.category}
+                  onChange={handleChange}
+                >
+                  <option value="">Select Category (optional)</option>
+                  {categories.map((category, index) => (
+                    <option key={index} value={category}>{category}</option>
+                  ))}
+                </Form.Control>
+              </Form.Group>
+
+              <Form.Group>
+                <Form.Check
+                  type="checkbox"
+                  label="Paid"
+                  name="isPaid"
+                  checked={expense.isPaid}
+                  onChange={handleChange}
+                />
+              </Form.Group>
+
+              <Button variant="primary" type="submit">
                 {editing ? "Update Expense" : "Add Expense"}
-                <FontAwesomeIcon icon={faPlusCircle} className="icon-right" />
               </Button>
             </Form>
           )}
@@ -291,8 +392,6 @@ function Expenses() {
             </div>
           )}
 
-          {addOption === 'google-wallet' && <p>Google Wallet integration will be added here.</p>}
-          {addOption === 'camera' && <p>Camera functionality will be added here.</p>}
         </Col>
       </Row>
     </Container>

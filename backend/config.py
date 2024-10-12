@@ -1,0 +1,2 @@
+API_KEY = "CUimL0GoW9YewTYuD5Tvi58dxeqRxR2S"
+MODEL_ID = "pixtral-12b-2409"
