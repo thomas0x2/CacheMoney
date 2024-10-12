@@ -192,18 +192,65 @@ function Expenses() {
           </Row>
 
           {/* Buttons for different add expense options */}
-          <div className="d-flex justify-content-between mt-4 mb-3">
-            <Button variant="secondary" onClick={() => handleOptionClick('google-wallet')}>Add through Google Wallet</Button>
-            <Button variant="secondary" onClick={() => handleOptionClick('camera')}>Add through Camera</Button>
-            <Button variant="secondary" onClick={() => handleOptionClick('picture')}>Add through Picture</Button>
-            <Button variant="primary" onClick={() => handleOptionClick('manual')}>Add Manually</Button>
+          <div className="d-flex justify-content-between mt-4 mb-3 button-group">
+            <Button variant="secondary" className="add-expense-btn" onClick={() => handleOptionClick('google-wallet')}>Add through Google Wallet</Button>
+            <Button variant="secondary" className="add-expense-btn" onClick={() => handleOptionClick('camera')}>Add through Camera</Button>
+            <Button variant="secondary" className="add-expense-btn" onClick={() => handleOptionClick('picture')}>Add through Picture</Button>
+            <Button variant="primary" className="add-expense-btn" onClick={() => handleOptionClick('manual')}>Add Manually</Button>
           </div>
 
           {/* Conditional rendering based on the selected option */}
           {addOption === 'manual' && (
             <Form onSubmit={handleSubmit}>
               {/* Manual Form Fields */}
-              {/* Your existing form code goes here */}
+              <Row className="grid-row">
+                <Col md={4}>
+                  <Form.Group>
+                    <Form.Label>Name</Form.Label>
+                    <Form.Control type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Expense Name" required />
+                  </Form.Group>
+                </Col>
+                <Col md={4}>
+                  <Form.Group>
+                    <Form.Label>Description</Form.Label>
+                    <Form.Control type="text" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Short description" required />
+                  </Form.Group>
+                </Col>
+                <Col md={4}>
+                  <Form.Group>
+                    <Form.Label>Amount</Form.Label>
+                    <Form.Control type="number" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="Expense Amount in CHF" required />
+                  </Form.Group>
+                </Col>
+              </Row>
+              <Row className="grid-row">
+                <Col md={4}>
+                  <Form.Group>
+                    <Form.Label>Date</Form.Label>
+                    <Form.Control type="date" value={date} onChange={(e) => setDate(e.target.value)} required />
+                  </Form.Group>
+                </Col>
+                <Col md={4}>
+                  <Form.Group>
+                    <Form.Label>Category</Form.Label>
+                    <Form.Select value={category} onChange={(e) => setCategory(e.target.value)}>
+                      <option value="">Select a category</option>
+                      {categories.map((cat, index) => (
+                        <option key={index} value={cat}>{cat}</option>
+                      ))}
+                    </Form.Select>
+                  </Form.Group>
+                </Col>
+                <Col md={4} className="d-flex align-items-center">
+                  <Form.Group>
+                    <Form.Check type="checkbox" label="Paid" checked={isPaid} onChange={(e) => setIsPaid(e.target.checked)} />
+                  </Form.Group>
+                </Col>
+              </Row>
+              <Button type="submit" className="mt-3 primary-button">
+                {editing ? "Update Expense" : "Add Expense"}
+                <FontAwesomeIcon icon={faPlusCircle} className="icon-right" />
+              </Button>
             </Form>
           )}
 

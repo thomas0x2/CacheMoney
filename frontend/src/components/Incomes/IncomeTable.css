@@ -1,0 +1,30 @@
+.income-table {
+  /* Add any additional table styles here */
+}
+
+.income-table thead tr {
+  /* Primary color is already applied with bg-primary class */
+  font-weight: bold;
+  background-color: var(--primary-color) !important;
+}
+
+.income-table tbody tr {
+  background-color: white;
+}
+
+.income-table .total-row {
+  background-color: #f8f9fa !important; /* Light grey color */
+  font-weight: bold;
+}
+
+/* Optional: Add some padding and text alignment */
+.income-table th,
+.income-table td {
+  padding: 12px;
+  text-align: right;
+}
+
+.income-table th:first-child,
+.income-table td:first-child {
+  text-align: left;
+}

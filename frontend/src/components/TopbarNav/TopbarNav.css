@@ -1,0 +1,31 @@
+.top-navbar {
+  box-shadow: 0 2px 4px rgba(0,0,0,.1);
+  background-color: var(--primary-color) !important;
+  padding-left: 0;
+  padding-right: 0;
+  width: 100vw;
+  margin-left: -50vw;
+  left: 50%;
+  position: relative;
+}
+
+.brand-text {
+  font-family: Helvetica, Arial, sans-serif;
+  font-style: italic;
+  font-weight: bold;
+  font-size: 1.5rem;
+  color: var(white);  /* Using Bootstrap's secondary color variable */
+}
+
+.nav-icon {
+  margin-right: 0.5rem;
+}
+
+/* Optional: Style the nav links to stand out against the primary background */
+.top-navbar .nav-link {
+  color: rgba(255, 255, 255, 0.85) !important;
+}
+
+.top-navbar .nav-link:hover {
+  color: #fff !important;
+}

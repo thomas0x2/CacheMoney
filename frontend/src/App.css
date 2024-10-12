@@ -365,4 +365,18 @@ a:hover {
   color: #ffffff; /* White text on hover for contrast */
 }
 
+.button-group .add-expense-btn {
+  background-color: var(--secondary-color);
+  color: var(--primary-color);
+  padding: 12px 24px;
+  border-radius: 10px;
+  transition: all 0.3s ease;
+}
+
+.button-group .add-expense-btn:hover {
+  background-color: var(--secondary-hover-color);
+  transform: scale(1.05);
+  color: white;
+}
+
 }
