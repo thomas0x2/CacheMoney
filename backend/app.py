@@ -67,7 +67,7 @@ def get_last_7_days_expenses():
         return jsonify({"error": str(e)}), 500
 
 @app.route('/api/expense/last30days', methods=['GET'])
-def get_last_7_days_expenses():
+def get_last_30_days_expenses():
     try:
         # Get the 'userid' from the request arguments (URL query params)
         userid = request.args.get('userid')
