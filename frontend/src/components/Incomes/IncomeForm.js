@@ -135,6 +135,7 @@ const IncomeForm = ({ onAddIncome, categories }) => {
             <option value="6">Saturday</option>
           </Form.Control>
         </Form.Group>
+
       )}
 
       {income.frequency === "monthly" && (

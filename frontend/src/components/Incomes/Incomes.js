@@ -13,6 +13,7 @@ import {
 import SidebarNav from "../SidebarNav/SidebarNav";
 import BreadcrumbAndProfile from "../BreadcrumbAndProfile/BreadcrumbAndProfile";
 import IncomeForm from "./IncomeForm";
+import IncomeTable from "./IncomeTable";
 import * as XLSX from "xlsx";
 import { Line } from "react-chartjs-2";
 import "chartjs-adapter-date-fns";
@@ -44,7 +45,7 @@ function Incomes() {
   const [category, setCategory] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
 
-  const categories = ["Salary", "Freelance", "Investment", "Other"];
+  const categories = ["Salary", "Pension", "Freelance", "Investment", "Other"];
 
   useEffect(() => {
     localStorage.setItem("incomes", JSON.stringify(incomes));
@@ -170,7 +171,6 @@ function Incomes() {
     );
   };
 
-
   return (
     <Container fluid>
       <Row>
@@ -202,7 +202,7 @@ function Incomes() {
               >
                 <Card className="mt-3 total">
                   <Card.Body>
-                    <Card.Title>Total Income this month</Card.Title>
+                    <Card.Title>Total Income</Card.Title>
                     <Card.Text>Total: {totalIncome.toFixed(2)} CHF</Card.Text>
                   </Card.Body>
                 </Card>
@@ -214,11 +214,12 @@ function Incomes() {
             </Col>
 
             <Col md={6}>
+              <h2>Recurring Income </h2>
               <ListGroup className="mt-3">
                 {filteredIncomes.map((income) => (
                   <ListGroup.Item key={income.id} className="list-group-item">
                     <div className="expense-details">
-                      {`${income.name} - Amount: CHF${income.amount} - Date: ${income.date} - Category: ${income.category || "Not specified"}`}
+                      {`${income.name} - Amount: CHF${income.amount} - Frequency: ${income.frequency} - Category: ${income.category || "Not specified"}`}
                     </div>
                     <div className="button-group">
                       <Button
@@ -250,7 +251,12 @@ function Incomes() {
               </ListGroup>
             </Col>
           </Row>
-
+          <Row className="mt-4">
+            <h3>Income Overview</h3>
+            <Col className="p4">
+              <IncomeTable incomes={incomes} />
+            </Col>
+          </Row>
           {/* Pagination Controls */}
           <div className="d-flex justify-content-between mt-3">
             <Button
