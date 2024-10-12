@@ -5,3 +5,10 @@ mistralai
 Werkzeug>=3.0.0
 flask-cors
 firebase_admin
+google-cloud-firestore
+grpcio
+google-cloud-core
+google-api-core 
+protobuf 
+pytz
+logging
