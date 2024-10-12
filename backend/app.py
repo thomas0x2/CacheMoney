@@ -43,16 +43,6 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
 
-@app.route('/api/test', methods=['GET'])
-def get_data():
-    # Return a JSON response with some sample data
-    sample_data = {
-        "name": "John Doe",
-        "age": 30,
-        "occupation": "Software Developer"
-    }
-    return jsonify(sample_data)
-
 # api to add income to the database
 # Needs {'uid', 'Amount', 'Category', 'Date', 'Frequency', 'Name']} in the request body
 @app.route('/api/add_income', methods=['POST'])
@@ -91,6 +81,45 @@ def add_income():
 
         # Return success response
         return jsonify({"success": True, "message": "Income added successfully"}), 201
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    
+@app.route('/api/add_expense', methods=['POST'])
+def add_expense():
+    try:
+        # Get the data from the request
+        data = request.json
+
+        # Ensure that the request contains 'userid' and 'expense'
+        if 'uid' not in data:
+            return jsonify({"error": "Missing 'userid' in request"}), 400
+        
+        userid = data['uid']
+        
+        # Verify that the required fields are in the expense object
+        required_fields = ['amount', 'category', 'date', 'description', 'name']
+        for field in required_fields:
+            if field not in data:
+                return jsonify({"error": f"Missing '{field}' in expense data"}), 400
+
+        # Convert the date string to a Firestore timestamp
+        data['date'] = datetime.datetime.strptime(data['date'], "%d %B %Y")
+
+        # Create a reference to the Firestore document path: users/{userid}/expenses/{auto_generated_id}
+        expense_ref = db.collection('users').document(userid).collection('expenses').document()
+
+        # Add the expense data to Firestore
+        expense_ref.set({
+            "amount": data['amount'],
+            "category": data['category'],
+            "date": data['date'],
+            "description": data['description'],
+            "name": data['name']
+        })
+
+        # Return success response
+        return jsonify({"success": True, "message": "Expense added successfully"}), 201
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
