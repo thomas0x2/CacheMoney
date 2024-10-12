@@ -139,6 +139,125 @@ def get_last_24_hours_expenses():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+    
+@app.route('/api/all_expenses', methods=['GET'])
+def get_all_expenses():
+    try:
+        # Get the 'userid' from the query parameters
+        userid = request.args.get('userid')
+
+        if not userid:
+            return jsonify({"error": "Missing 'userid' in query parameters"}), 400
+
+        # Get the current date
+        now = datetime.now()
+
+        # Query Firestore for all expenses up to the current date
+        expenses_ref = db.collection('users').document(userid).collection('expenses')
+        expenses_query = expenses_ref.where('Date', '<=', now).order_by('Date', direction=firestore.Query.DESCENDING)
+        expenses = expenses_query.stream()
+
+        # Collect expenses into a list
+        expenses_list = []
+        for expense in expenses:
+            expense_data = expense.to_dict()
+            expenses_list.append({
+                "id": expense.id,  # Include the document ID
+                "amount": expense_data.get('Amount'),
+                "category": expense_data.get('Category'),
+                "date": expense_data.get('Date').strftime("%Y-%m-%d %H:%M:%S"),
+                "description": expense_data.get('Description'),
+                "name": expense_data.get('Name')
+            })
+
+        return jsonify({"expenses": expenses_list}), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/all_incomes', methods=['GET'])
+def get_all_incomes():
+    try:
+        # Get the 'userid' from the query parameters
+        userid = request.args.get('userid')
+
+        if not userid:
+            return jsonify({"error": "Missing 'userid' in query parameters"}), 400
+
+        # Get the current date
+        now = datetime.now()
+
+        # Query Firestore for all incomes up to the current date
+        income_ref = db.collection('users').document(userid).collection('income')
+        income_query = income_ref.where('Date', '<=', now).order_by('Date', direction=firestore.Query.DESCENDING)
+        incomes = income_query.stream()
+
+        # Collect incomes into a list
+        income_list = []
+        for income in incomes:
+            income_data = income.to_dict()
+            income_list.append({
+                "id": income.id,  # Include the document ID
+                "amount": income_data.get('Amount'),
+                "category": income_data.get('Category'),
+                "date": income_data.get('Date').strftime("%Y-%m-%d %H:%M:%S"),
+                "frequency": income_data.get('Frequency'),
+                "name": income_data.get('Name')
+            })
+
+        return jsonify({"incomes": income_list}), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    
+@app.route('/api/financial_summary', methods=['GET'])
+def get_financial_summary():
+    try:
+        # Get the 'userid' from the query parameters
+        userid = request.args.get('userid')
+
+        if not userid:
+            return jsonify({"error": "Missing 'userid' in query parameters"}), 400
+
+        # Get the current date
+        now = datetime.now()
+
+        # Initialize totals for income and expenses
+        total_income = 0
+        total_expenses = 0
+
+        ### Query Firestore for all incomes up to the current date
+        income_ref = db.collection('users').document(userid).collection('income')
+        income_query = income_ref.where('Date', '<=', now).order_by('Date', direction=firestore.Query.DESCENDING)
+        incomes = income_query.stream()
+
+        # Sum up the total income
+        for income in incomes:
+            income_data = income.to_dict()
+            total_income += income_data.get('Amount', 0)
+
+        ### Query Firestore for all expenses up to the current date
+        expenses_ref = db.collection('users').document(userid).collection('expenses')
+        expenses_query = expenses_ref.where('Date', '<=', now).order_by('Date', direction=firestore.Query.DESCENDING)
+        expenses = expenses_query.stream()
+
+        # Sum up the total expenses
+        for expense in expenses:
+            expense_data = expense.to_dict()
+            total_expenses += expense_data.get('Amount', 0)
+
+        # Calculate savings
+        savings = total_income - total_expenses
+
+        # Return the aggregated totals and savings
+        return jsonify({
+            "total_income": total_income,
+            "total_expenses": total_expenses,
+            "savings": savings
+        }), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 # api to add income to the database
 # Needs {'uid', 'Amount', 'Category', 'Date', 'Frequency', 'Name']} in the request body
