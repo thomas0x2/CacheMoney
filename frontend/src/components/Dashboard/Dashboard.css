@@ -21,3 +21,24 @@
     
   }
   
+.top-nav-row {
+  height: 60px; /* Adjust this value to make the row thinner or thicker */
+}
+
+/* Ensure the TopbarNav component fits within the thinner row */
+.top-nav-row .navbar {
+  padding-top: 0;
+  padding-bottom: 0;
+  height: 100%;
+}
+
+/* Adjust the brand text size if necessary */
+.top-nav-row .navbar-brand {
+  font-size: 1.25rem; /* Reduce this if the brand text is too large for the thinner row */
+}
+
+/* Adjust nav links if necessary */
+.top-nav-row .nav-link {
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+}

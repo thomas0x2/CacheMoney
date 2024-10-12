@@ -36,7 +36,7 @@ function TargetSettingMenu({ onSaveTarget }) {
           placeholder="Enter amount"
         />
       </Form.Group>
-      <Button variant="primary" type="submit">
+      <Button variant="primary" type="submit" className="mt-3 primary-button">
         Save Target
       </Button>
     </Form>
