@@ -13,7 +13,7 @@
   flex-direction: column; /* Stack items vertically */
   align-items: flex-start; /* Align items to the left */
   text-align: left; /* Ensure the text is aligned to the left */
-  color: var(--secondary-color);
+  color: #FFFFFF; 
   text-decoration: none;
   margin-bottom: 10px;
   transition: color 0.3s ease, transform 0.3s ease;
@@ -32,37 +32,30 @@
   margin-bottom: 5px; /* Space between icon and text */
 }
 
-
 .logo-img {
-  max-width: 100%; /* Ensures logo does not exceed the width of its container */
+  max-width: 80%; /* Ensures logo does not exceed the width of its container */
   height: auto; /* Keeps the aspect ratio of the logo */
-  margin-bottom: 24px;
+  margin-bottom: 30px;
   margin-top: 24px;
 }
 
 .exit-link {
-  margin-top: 200px;
-  color: var(--secondary-color);
+  margin-top: 100px;
+  color: #FFFFFF;
   border: 2px solid var(--secondary-color);
   border-radius: 5px;
-  padding: 4px 8px; /* Reduced padding for a tighter fit */
-  font-size: 0.8em; 
+  padding: 4px 4px; /* Reduced padding for a tighter fit */
+  font-size: 1.0em; 
   display: inline-flex; /* Use inline-flex if you need flexbox alignment properties */
   align-items: center; /* Vertically center the content if using flexbox */
   justify-content: center; /* Horizontally center the content if using flexbox */
   text-align: center; /* Ensure text is centered */
 }
 
-
 .exit-link:hover {
   transform: scale(1.05); /* Apply scale transform for zoom effect */
   color: var(--primary-color);
   background-color: var(--secondary-hover-color);
-}
-
-.github-link {
-  margin-top: 5px;
-  font-size: 0.8em;
 }
 
 /* Media query for iPad screens in landscape orientation (1024px) */

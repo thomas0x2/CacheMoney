@@ -1,6 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700&display=swap');
 
-:root {
+/* :root {
+  --primary-color: #000758;
   --primary-color: #000758;
   --hover-color: #000D9E;
   --secondary-color: #40E0D0;
@@ -19,6 +20,27 @@
   --page-color: #666;
   --page-hover-color: #333;
   --breadcrumb: #DADADA;
+} */
+
+:root {
+  --primary-color: #006400; /* Dark green for primary color */
+  --hover-color: #4cb60f; /* Dodger blue for hover effects */
+  --secondary-color: #32CD32; /* Lime green for secondary color */
+  --secondary-hover-color: #228B22; /* Forest green for secondary hover */
+  --background-color: #F4F4F4; /* Keep the same background color */
+  --input: #DADADA; /* Keep the same input color */
+  --link: #32CD32; /* Lime green for links */
+  --link-hover: #1E90FF; /* Dodger blue for link hover */
+  --link-dark: #228B22; /* Darker green for dark links */
+  --link-dark-hover: #1E90FF; /* Dodger blue for dark link hover */
+  --text-color: #333333; /* Keep the same text color */
+  --warning-color: #FF6B6B; /* Keep the warning color */
+  --warning-hover-color: #CB5353; /* Keep the warning hover color */
+  --edit-color: #98FB98; /* Pale green for edit buttons */
+  --edit-hover-color: #006400; /* Dark green for edit hover */
+  --page-color: #228B22; /* Forest green for page controls */
+  --page-hover-color: #1E90FF; /* Dodger blue for page hover */
+  --breadcrumb: #DADADA; /* Keep the breadcrumb color */
 }
 
 body {

@@ -122,7 +122,7 @@ function Dashboard({ totalIncomes, totalExpenses, monthlyTarget = 5000, monthlyS
           <Row className="mb-5 mt-4">
             <Col md={12} className="expense-tracker">
               <div className="d-flex justify-content-between align-items-center mb-3">
-                <h3 className="expense-tracker-title">Expense Tracker</h3>
+                <h2 className="expense-tracker-title">Expense Tracker</h2>
                 <DropdownButton
                   id="dropdown-time-range"
                   title={`Showing: Last ${timeRange}`}
