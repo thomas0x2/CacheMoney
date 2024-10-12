@@ -1,57 +1,150 @@
 // Dashboard.js
-import React, { useState } from 'react';
-import { Container, Row, Col, Button, Table, Dropdown, DropdownButton } from 'react-bootstrap';
-import TopbarNav from '../TopbarNav/TopbarNav';
-import SidebarNav from '../SidebarNav/SidebarNav';
-import BreadcrumbAndProfile from '../BreadcrumbAndProfile/BreadcrumbAndProfile';
-import InfoCard from '../InfoCard/InfoCard';
-import NewsCard from '../NewsCard/NewsCard';
-import './Dashboard.css';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faRotateRight } from '@fortawesome/free-solid-svg-icons';
-import { motion } from 'framer-motion';
+import React, { useState, useContext } from "react";
+import {
+  Container,
+  Row,
+  Col,
+  Button,
+  Table,
+  Dropdown,
+  DropdownButton,
+} from "react-bootstrap";
+import TopbarNav from "../TopbarNav/TopbarNav";
+import SidebarNav from "../SidebarNav/SidebarNav";
+import BreadcrumbAndProfile from "../BreadcrumbAndProfile/BreadcrumbAndProfile";
+import InfoCard from "../InfoCard/InfoCard";
+import NewsCard from "../NewsCard/NewsCard";
+import "./Dashboard.css";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faRotateRight } from "@fortawesome/free-solid-svg-icons";
+import { motion } from "framer-motion";
 
-function Dashboard({ totalIncomes, totalExpenses, monthlyTarget = 5000, monthlySavings = 1500 }) {
-  const [timeRange, setTimeRange] = useState('7 Days');
+// Add this line to get User Data
+import { UserContext } from "../Auth/UserContext"; // Import UserContext
+
+function Dashboard({
+  totalIncomes,
+  totalExpenses,
+  monthlyTarget = 5000,
+  monthlySavings = 1500,
+}) {
+  const [timeRange, setTimeRange] = useState("7 Days");
+
+  // Add this line to get User Data
+  const user = useContext(UserContext);
+
+  // Get user data like the following
+  console.log(user.displayName, user.uid, user.photoURL);
 
   // Example expenses data
   const expenses = [
-    { date: '10/01/2024', category: 'Groceries', description: 'Weekly shopping', amount: '$50', daysAgo: 10 },
-    { date: '10/03/2024', category: 'Transport', description: 'Monthly bus pass', amount: '$80', daysAgo: 8 },
-    { date: '10/05/2024', category: 'Entertainment', description: 'Streaming service subscription', amount: '$15', daysAgo: 6 },
-    { date: '10/07/2024', category: 'Utilities', description: 'Electricity bill', amount: '$120', daysAgo: 4 },
-    { date: '10/08/2024', category: 'Dining', description: 'Dinner at restaurant', amount: '$45', daysAgo: 3 },
-    { date: '10/09/2024', category: 'Health', description: 'Pharmacy purchase', amount: '$30', daysAgo: 2 },
-    { date: '10/10/2024', category: 'Entertainment', description: 'Cinema tickets', amount: '$25', daysAgo: 1 },
-    { date: '10/11/2024', category: 'Groceries', description: 'Organic market shopping', amount: '$65', daysAgo: 0 },
-    { date: '10/11/2024', category: 'Fitness', description: 'Gym membership', amount: '$35', daysAgo: 0 },
-    { date: '10/11/2024', category: 'Subscriptions', description: 'Monthly music service', amount: '$10', daysAgo: 0 },
-    { date: '10/11/2024', category: 'Transport', description: 'Gas for car', amount: '$40', daysAgo: 0 },
-    { date: '10/11/2024', category: 'Gifts', description: 'Birthday present', amount: '$70', daysAgo: 0 },
+    {
+      date: "10/01/2024",
+      category: "Groceries",
+      description: "Weekly shopping",
+      amount: "$50",
+      daysAgo: 10,
+    },
+    {
+      date: "10/03/2024",
+      category: "Transport",
+      description: "Monthly bus pass",
+      amount: "$80",
+      daysAgo: 8,
+    },
+    {
+      date: "10/05/2024",
+      category: "Entertainment",
+      description: "Streaming service subscription",
+      amount: "$15",
+      daysAgo: 6,
+    },
+    {
+      date: "10/07/2024",
+      category: "Utilities",
+      description: "Electricity bill",
+      amount: "$120",
+      daysAgo: 4,
+    },
+    {
+      date: "10/08/2024",
+      category: "Dining",
+      description: "Dinner at restaurant",
+      amount: "$45",
+      daysAgo: 3,
+    },
+    {
+      date: "10/09/2024",
+      category: "Health",
+      description: "Pharmacy purchase",
+      amount: "$30",
+      daysAgo: 2,
+    },
+    {
+      date: "10/10/2024",
+      category: "Entertainment",
+      description: "Cinema tickets",
+      amount: "$25",
+      daysAgo: 1,
+    },
+    {
+      date: "10/11/2024",
+      category: "Groceries",
+      description: "Organic market shopping",
+      amount: "$65",
+      daysAgo: 0,
+    },
+    {
+      date: "10/11/2024",
+      category: "Fitness",
+      description: "Gym membership",
+      amount: "$35",
+      daysAgo: 0,
+    },
+    {
+      date: "10/11/2024",
+      category: "Subscriptions",
+      description: "Monthly music service",
+      amount: "$10",
+      daysAgo: 0,
+    },
+    {
+      date: "10/11/2024",
+      category: "Transport",
+      description: "Gas for car",
+      amount: "$40",
+      daysAgo: 0,
+    },
+    {
+      date: "10/11/2024",
+      category: "Gifts",
+      description: "Birthday present",
+      amount: "$70",
+      daysAgo: 0,
+    },
   ];
 
-
   // Filter expenses based on the selected time range
-  const filteredExpenses = expenses.filter(expense => {
-    if (timeRange === '24 Hours') return expense.daysAgo <= 1;
-    if (timeRange === '7 Days') return expense.daysAgo <= 7;
+  const filteredExpenses = expenses.filter((expense) => {
+    if (timeRange === "24 Hours") return expense.daysAgo <= 1;
+    if (timeRange === "7 Days") return expense.daysAgo <= 7;
     return true; // default to show all expenses
   });
 
   return (
     <Container fluid>
       <Row className="topbar">
-          <TopbarNav username="Nerit Küneşko" role="Entrepreneur"/>
+        <TopbarNav username="Nerit Küneşko" role="Entrepreneur" />
       </Row>
       <Row>
         <Col md={10} className="main-content main">
-          <BreadcrumbAndProfile 
-            username="Nerit Küneşko" 
-            role="Entrepreneur" 
+          <BreadcrumbAndProfile
+            username="Nerit Küneşko"
+            role="Entrepreneur"
             pageTitle="Dashboard"
             breadcrumbItems={[
-              { name: 'Dashboard', path: '/dashboard', active: true },
-              { name: 'Welcome', path: '/welcome', active: true }
+              { name: "Dashboard", path: "/dashboard", active: true },
+              { name: "Welcome", path: "/welcome", active: true },
             ]}
           />
 
@@ -130,7 +223,9 @@ function Dashboard({ totalIncomes, totalExpenses, monthlyTarget = 5000, monthlyS
                   variant="secondary"
                   onSelect={(e) => setTimeRange(e)}
                 >
-                  <Dropdown.Item eventKey="24 Hours">Last 24 Hours</Dropdown.Item>
+                  <Dropdown.Item eventKey="24 Hours">
+                    Last 24 Hours
+                  </Dropdown.Item>
                   <Dropdown.Item eventKey="7 Days">Last 7 Days</Dropdown.Item>
                 </DropdownButton>
               </div>
@@ -155,7 +250,9 @@ function Dashboard({ totalIncomes, totalExpenses, monthlyTarget = 5000, monthlyS
                     ))
                   ) : (
                     <tr>
-                      <td colSpan="4" className="text-center">No expenses found for the selected time range.</td>
+                      <td colSpan="4" className="text-center">
+                        No expenses found for the selected time range.
+                      </td>
                     </tr>
                   )}
                 </tbody>
@@ -201,7 +298,6 @@ function Dashboard({ totalIncomes, totalExpenses, monthlyTarget = 5000, monthlyS
               </Row>
             </div>
           </div>
-
         </Col>
       </Row>
     </Container>

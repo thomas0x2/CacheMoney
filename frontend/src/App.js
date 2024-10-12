@@ -8,6 +8,7 @@ import SignOut from "./components/SignOut/SignOut";
 import Target from "./components/Target/Target";
 import Savings from "./components/Savings/Savings";
 import AuthenticatedRoute from "./components/Auth/AuthenticatedRoute";
+import { UserProvider } from "./components/Auth/UserContext"; // Import UserProvider
 
 import "./App.css";
 
@@ -44,41 +45,43 @@ function App() {
   }, [expenses]);
 
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<SignIn />} />
-        <Route
-          path="/dashboard"
-          element={
-            <AuthenticatedRoute>
-              <Dashboard
-                totalIncomes={totalIncomes}
-                totalExpenses={totalExpenses}
-              />
-            </AuthenticatedRoute>
-          }
-        />
-        <Route
-          path="/incomes"
-          element={
-            <AuthenticatedRoute>
-              <Incomes incomes={incomes} setIncomes={setIncomes} />
-            </AuthenticatedRoute>
-          }
-        />
-        <Route
-          path="/expenses"
-          element={
-            <AuthenticatedRoute>
-              <Expenses expenses={expenses} setExpenses={setExpenses} />
-            </AuthenticatedRoute>
-          }
-        />
-        <Route path="/signout" element={<SignOut />} />
-        <Route path="/target" element={<Target />} />
-        <Route path="/savings" element={<Savings />} />
-      </Routes>
-    </Router>
+    <UserProvider>
+      <Router>
+        <Routes>
+          <Route path="/" element={<SignIn />} />
+          <Route
+            path="/dashboard"
+            element={
+              <AuthenticatedRoute>
+                <Dashboard
+                  totalIncomes={totalIncomes}
+                  totalExpenses={totalExpenses}
+                />
+              </AuthenticatedRoute>
+            }
+          />
+          <Route
+            path="/incomes"
+            element={
+              <AuthenticatedRoute>
+                <Incomes incomes={incomes} setIncomes={setIncomes} />
+              </AuthenticatedRoute>
+            }
+          />
+          <Route
+            path="/expenses"
+            element={
+              <AuthenticatedRoute>
+                <Expenses expenses={expenses} setExpenses={setExpenses} />
+              </AuthenticatedRoute>
+            }
+          />
+          <Route path="/signout" element={<SignOut />} />
+          <Route path="/target" element={<Target />} />
+          <Route path="/savings" element={<Savings />} />
+        </Routes>
+      </Router>
+    </UserProvider>
   );
 }
 
