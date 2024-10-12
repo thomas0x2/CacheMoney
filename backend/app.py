@@ -26,15 +26,78 @@ firebase_admin.initialize_app(cred)
 # Initialize Firestore
 db = firestore.client()
 
-@app.route('/api/test', methods=['GET'])
-def get_data():
-    # Return a JSON response with some sample data
-    sample_data = {
-        "name": "John Doe",
-        "age": 30,
-        "occupation": "Software Developer"
-    }
-    return jsonify(sample_data)
+# Get last 7 days expenses
+@app.route('/api/expenses/last7days', methods=['GET'])
+def get_last_7_days_expenses():
+    try:
+        # Get the 'userid' from the request arguments (URL query params)
+        userid = request.args.get('userid')
+
+        if not userid:
+            return jsonify({"error": "Missing 'userid' in query parameters"}), 400
+
+        # Calculate the date 7 days ago from today
+        today = datetime.datetime.now()
+        seven_days_ago = today - datetime.timedelta(days=7)
+
+        # Query Firestore for expenses in the last 7 days
+        expenses_ref = db.collection('users').document(userid).collection('expenses')
+        query = expenses_ref.where('date', '>=', seven_days_ago).order_by('date', direction=firestore.Query.DESCENDING)
+        expenses = query.stream()
+
+        # Collect the results into a list
+        expenses_list = []
+        for expense in expenses:
+            expense_data = expense.to_dict()
+            expenses_list.append({
+                "id": expense.id,  # Include the document ID
+                "amount": expense_data.get('amount'),
+                "category": expense_data.get('category'),
+                "date": expense_data.get('date').strftime("%Y-%m-%d %H:%M:%S"),  # Convert timestamp to string
+                "description": expense_data.get('description'),
+                "name": expense_data.get('name')
+            })
+
+        return jsonify({"expenses": expenses_list}), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/expenses/last24hours', methods=['GET'])
+def get_last_24_hours_expenses():
+    try:
+        # Get the 'userid' from the request arguments (URL query params)
+        userid = request.args.get('userid')
+
+        if not userid:
+            return jsonify({"error": "Missing 'userid' in query parameters"}), 400
+
+        # Calculate the date 24 hours ago from now
+        now = datetime.datetime.now()
+        twenty_four_hours_ago = now - datetime.timedelta(hours=24)
+
+        # Query Firestore for expenses in the last 24 hours
+        expenses_ref = db.collection('users').document(userid).collection('expenses')
+        query = expenses_ref.where('date', '>=', twenty_four_hours_ago).order_by('date', direction=firestore.Query.DESCENDING)
+        expenses = query.stream()
+
+        # Collect the results into a list
+        expenses_list = []
+        for expense in expenses:
+            expense_data = expense.to_dict()
+            expenses_list.append({
+                "id": expense.id,  # Include the document ID
+                "amount": expense_data.get('amount'),
+                "category": expense_data.get('category'),
+                "date": expense_data.get('date').strftime("%Y-%m-%d %H:%M:%S"),  # Convert timestamp to string
+                "description": expense_data.get('description'),
+                "name": expense_data.get('name')
+            })
+
+        return jsonify({"expenses": expenses_list}), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 UPLOAD_FOLDER = './uploads'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -98,24 +161,24 @@ def add_expense():
         userid = data['uid']
         
         # Verify that the required fields are in the expense object
-        required_fields = ['amount', 'category', 'date', 'description', 'name']
+        required_fields = ['Amount', 'Category', 'Date', 'Description', 'Name']
         for field in required_fields:
             if field not in data:
                 return jsonify({"error": f"Missing '{field}' in expense data"}), 400
 
-        # Convert the date string to a Firestore timestamp
-        data['date'] = datetime.datetime.strptime(data['date'], "%d %B %Y")
+        # Convert the Date string to a Firestore timestamp
+        data['Date'] = datetime.datetime.strptime(data['Date'], "%d %B %Y")
 
         # Create a reference to the Firestore document path: users/{userid}/expenses/{auto_generated_id}
         expense_ref = db.collection('users').document(userid).collection('expenses').document()
 
         # Add the expense data to Firestore
         expense_ref.set({
-            "amount": data['amount'],
-            "category": data['category'],
-            "date": data['date'],
-            "description": data['description'],
-            "name": data['name']
+            "Amount": data['Amount'],
+            "Category": data['Category'],
+            "Date": data['Date'],
+            "Description": data['Description'],
+            "Name": data['Name']
         })
 
         # Return success response
