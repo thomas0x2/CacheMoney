@@ -12,40 +12,31 @@ client = Mistral(api_key=API_KEY)
 
 app = Flask(__name__)
 
-# app = Flask(__name__)
+UPLOAD_FOLDER = './uploads'
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-# # Use the JSON key file you downloaded from Firebase
-# cred = credentials.Certificate("./cachemoney-95b14-e8ba240701ef.json")
-# firebase_admin.initialize_app(cred)
+# Ensure the uploads folder exists
+if not os.path.exists(UPLOAD_FOLDER):
+    os.makedirs(UPLOAD_FOLDER)
 
-# # Initialize Firestore DB
-# db = firestore.client()
-
-# UPLOAD_FOLDER = './uploads'
-# app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-
-# # Ensure the uploads folder exists
-# if not os.path.exists(UPLOAD_FOLDER):
-#     os.makedirs(UPLOAD_FOLDER)
-
-# @app.route('/api/upload', methods=['POST'])
-# def upload_file():
-#     if 'file' not in request.files:
-#         return jsonify({"error": "No file provided"}), 400
+@app.route('/api/upload', methods=['POST'])
+def upload_file():
+    if 'file' not in request.files:
+        return jsonify({"error": "No file provided"}), 400
     
-#     file = request.files['file']
+    file = request.files['file']
     
-#     if file.filename == '':
-#         return jsonify({"error": "No selected file"}), 400
+    if file.filename == '':
+        return jsonify({"error": "No selected file"}), 400
 
-#     filename = secure_filename(file.filename)
-#     file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-#     file.save(file_path)
+    filename = secure_filename(file.filename)
+    file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+    file.save(file_path)
 
     # Process the image to extract text and return structured data in JSON format using Mistral API
     extracted_data = process_image(file_path)
 
-#     return jsonify(extracted_data)
+    return jsonify(extracted_data)
 
 def process_image(image_path):
     try:

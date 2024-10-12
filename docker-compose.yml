@@ -1,5 +1,6 @@
 version: "3"
 services:
+
   backend:
     container_name: hack-backend
     build:
@@ -17,6 +18,7 @@ services:
       traefik.http.services.backend.loadbalancer.server.port: 5000
     restart: unless-stopped
 
+
   frontend:
     container_name: hack-frontend
     build:
@@ -24,7 +26,7 @@ services:
       dockerfile: ./Dockerfile
     expose:
       - 3000
-    command: ["sh", "-c", "npm install && npm start"]
+    command: [ "sh", "-c", "npm install && npm start" ]
     working_dir: /app
     volumes:
       - ./frontend:/app
