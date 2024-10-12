@@ -164,7 +164,7 @@ function Dashboard({
                   title="Monthly Target"
                   value={`CHF ${savingTarget}`}
                   linkText="Set your target"
-                  linkTo="/target"
+                  linkTo="/savings"
                 />
               </motion.div>
             </Col>

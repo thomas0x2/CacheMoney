@@ -55,31 +55,33 @@ const categories = [
 
 function ProgressRing({ progress, text, currentSavings, savingsTarget }) {
   const radius = 35;
-  const circumference = 2 * Math.PI * radius;
+  const strokeWidth = 8; // Increased stroke width for thicker rings
+  const normalizedRadius = radius - strokeWidth / 2;
+  const circumference = 2 * Math.PI * normalizedRadius;
   const fillPercentage = Math.min(Math.max(progress, 0), 1);
   const fillOffset = circumference * (1 - fillPercentage);
 
   return (
     <div className="text-center">
-      <svg width="80" height="80" viewBox="0 0 80 80">
+      <svg width="90" height="90" viewBox="0 0 90 90">
         <circle
-          cx="40"
-          cy="40"
-          r={radius}
+          cx="45"
+          cy="45"
+          r={normalizedRadius}
           fill="transparent"
           stroke="#A9A9A9"
-          strokeWidth="4"
+          strokeWidth={strokeWidth}
         />
         <circle
-          cx="40"
-          cy="40"
-          r={radius}
+          cx="45"
+          cy="45"
+          r={normalizedRadius}
           fill="transparent"
           stroke="#00008B"
-          strokeWidth="4"
+          strokeWidth={strokeWidth}
           strokeDasharray={circumference}
           strokeDashoffset={fillOffset}
-          transform="rotate(-90 40 40)"
+          transform="rotate(-90 45 45)"
         />
       </svg>
       <p className="mt-2">{text}</p>
@@ -121,13 +123,15 @@ function Savings() {
   }, [setSavingTarget]);
 
   const updateCurrentSavings = (entries) => {
-    const savingsByCategory = entries.reduce((acc, entry) => {
-      acc[entry.category] = (acc[entry.category] || 0) + entry.amount;
+    const savingsByMonth = entries.reduce((acc, entry) => {
+      const date = new Date(entry.date);
+      const monthYear = `${date.getMonth() + 1}/${date.getFullYear()}`;
+      acc[monthYear] = (acc[monthYear] || 0) + entry.amount;
       return acc;
     }, {});
-    setCurrentSavings(savingsByCategory);
+    setCurrentSavings(savingsByMonth);
 
-    const newTotalSavings = Object.values(savingsByCategory).reduce((sum, value) => sum + value, 0);
+    const newTotalSavings = Object.values(savingsByMonth).reduce((sum, value) => sum + value, 0);
     setTotalSavings(newTotalSavings); // Update global total savings
   };
 
@@ -167,24 +171,30 @@ function Savings() {
   };
 
   const getRingData = () => {
-    const planRings = savingsPlan.slice(0, 3).map((category) => ({
-      text: category.name,
-      progress: (currentSavings[category.name] || 0) / category.savingsTarget,
-      currentSavings: currentSavings[category.name] || 0,
-      savingsTarget: category.savingsTarget,
+    const currentDate = new Date();
+    const last3Months = Array.from({ length: 3 }, (_, i) => {
+      const d = new Date(currentDate.getFullYear(), currentDate.getMonth() - i, 1);
+      return `${d.getMonth() + 1}/${d.getFullYear()}`;
+    });
+
+    const monthlyRings = last3Months.map((monthYear) => ({
+      text: monthYear,
+      progress: (currentSavings[monthYear] || 0) / (savingTarget / 12), // Assuming monthly target is annual target divided by 12
+      currentSavings: currentSavings[monthYear] || 0,
+      savingsTarget: savingTarget / 12,
     }));
 
-    const remainingRings = [
-      {
-        text: "Total Savings",
-        progress: totalSavings / savingTarget,
-        currentSavings: totalSavings,
-        savingsTarget: savingTarget,
-      },
-    ];
+    const totalRing = {
+      text: "Total Savings",
+      progress: totalSavings / savingTarget,
+      currentSavings: totalSavings,
+      savingsTarget: savingTarget,
+    };
 
-    return [...planRings, ...remainingRings];
-  };  return (
+    return [...monthlyRings, totalRing];
+  };
+
+  return (
     <Container fluid>
       <Row className="topbar">
         <TopbarNav username="Nerit Küneşko" role="Entrepreneur" />
@@ -217,9 +227,7 @@ function Savings() {
 
           <Row className="mt-4">
             <Col md={6}>
-              <AddSavings onAddSaving={handleAddSaving} categories={categories} />
               <SavingsSetup 
-                categories={categories} 
                 savingsPlan={savingsPlan} 
                 onSavingsPlanChange={handleSavingsPlanChange}
               />

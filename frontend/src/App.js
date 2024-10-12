@@ -5,7 +5,6 @@ import Dashboard from "./components/Dashboard/Dashboard";
 import Incomes from "./components/Incomes/Incomes";
 import Expenses from "./components/Expenses/Expenses";
 import SignOut from "./components/SignOut/SignOut";
-import Target from "./components/Target/Target";
 import Savings from "./components/Savings/Savings";
 import AuthenticatedRoute from "./components/Auth/AuthenticatedRoute";
 import { UserProvider } from "./components/Auth/UserContext";
@@ -92,7 +91,6 @@ function App() {
               }
             />
             <Route path="/signout" element={<SignOut />} />
-            <Route path="/target" element={<Target />} />
             <Route path="/savings" element={<Savings />} />
           </Routes>
         </Router>
