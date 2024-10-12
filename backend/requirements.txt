@@ -4,3 +4,4 @@ pillow
 mistralai
 Werkzeug>=3.0.0
 flask-cors
+firebase_admin
