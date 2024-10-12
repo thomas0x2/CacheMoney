@@ -14,6 +14,7 @@ import TopbarNav from "../TopbarNav/TopbarNav";
 import BreadcrumbAndProfile from "../BreadcrumbAndProfile/BreadcrumbAndProfile";
 import IncomeForm from "./IncomeForm";
 import IncomeTable from "./IncomeTable";
+import InfoCard from "../InfoCard/InfoCard";
 import * as XLSX from "xlsx";
 import { Line } from "react-chartjs-2";
 import "chartjs-adapter-date-fns";
@@ -174,7 +175,7 @@ function Incomes() {
   return (
     <Container fluid>
       <Row className="topbar">
-          <TopbarNav username="Nerit Küneşko" role="Entrepreneur"/>
+        <TopbarNav username="Nerit Küneşko" role="Entrepreneur" />
       </Row>
       <Row>
         <Col md={10} className="main">
@@ -200,12 +201,11 @@ function Incomes() {
                 animate={{ opacity: 1, y: 0 }} // Animate to: fully opaque and in its final position
                 transition={{ duration: 0.5, delay: 0.2 }} // Customize the duration and add a delay if desired
               >
-                <Card className="mt-3 total">
-                  <Card.Body>
-                    <Card.Title>Total Income</Card.Title>
-                    <Card.Text>Total: {totalIncome.toFixed(2)} CHF</Card.Text>
-                  </Card.Body>
-                </Card>
+                <InfoCard
+                  title="Total Income"
+                  value={`CHF ${totalIncome.toFixed(2)}`}
+                  className="mt-3 total"
+                />
               </motion.div>
               <IncomeForm
                 onAddIncome={handleAddIncome}

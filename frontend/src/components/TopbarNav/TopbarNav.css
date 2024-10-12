@@ -3,6 +3,18 @@
   background-color: var(--background-color) !important;
   padding: 0.5rem 0;
 }
+.navbar-collapse {
+  flex-basis: auto;
+}
+
+.exit-link {
+  white-space: nowrap;
+}
+
+.user-info {
+  font-size: 0.8rem;
+  line-height: 1.2;
+}
 
 .top-navbar .navbar-nav {
   padding-top: 10px;
@@ -34,10 +46,11 @@
 }
 
 .top-navbar .nav-link:hover {
-  color: var(--hover) !important;
+  color: var(--hover-color) !important;
 }
 
 .profile {
+  white-space: nowrap;
   display: flex;
   align-items: center;
 }
