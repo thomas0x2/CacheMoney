@@ -2,7 +2,7 @@ from flask import Flask, request, jsonify
 import os
 from werkzeug.utils import secure_filename
 from PIL import Image
-import pytesseract
+# import pytesseract
 
 app = Flask(__name__)
 

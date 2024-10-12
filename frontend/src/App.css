@@ -23,31 +23,35 @@
 } */
 
 :root {
-  --primary-color: #002855; /* Darker navy blue for primary color */
-  --hover-color: #001845; /* Even darker blue for hover effects */
-  --secondary-color: #0466c8; /* Bright blue for secondary color */
-  --secondary-hover-color: #0353a4; /* Darker bright blue for secondary hover */
-  --background-color: #001233; /* Deep navy blue for the background */
-  --input: #33415c; /* Slightly lighter blue for input fields */
-  --link: #0466c8; /* Bright blue for links */
-  --link-hover: #0353a4; /* Darker bright blue for link hover */
-  --link-dark: #023e7d; /* Darker blue for dark links */
-  --link-dark-hover: #002855; /* Primary dark blue for dark link hover */
-  --text-color: #ffffff; /* White text color for readability */
+  --primary-color: #1b1b1b; /* Dark grey for primary color */
+  --hover-color: #3d3d3d; /* Slightly lighter grey for hover effects */
+  --secondary-color: #1E90FF; /* Dodger blue for secondary color */
+  --secondary-hover-color: #4682B4; /* Steel blue for secondary hover */
+  --background-color: #121212; /* Dark background for the whole page */
+  --input: #2a2a2a; /* Darker input fields */
+  --link: #1E90FF; /* Dodger blue for links */
+  --link-hover: #63B8FF; /* Light sky blue for link hover */
+  --link-dark: #4682B4; /* Steel blue for dark links */
+  --link-dark-hover: #1E90FF; /* Dodger blue for dark link hover */
+  --text-color: #e0e0e0; /* Light grey text color for contrast */
   --warning-color: #FF6B6B; /* Keep the warning color */
   --warning-hover-color: #E57373; /* Slightly lighter warning hover color */
-  --edit-color: #5c677d; /* Muted gray-blue for edit buttons */
-  --edit-hover-color: #7d8597; /* Lighter blue-gray for edit hover */
-  --page-color: #023e7d; /* Medium dark blue for page controls */
-  --page-hover-color: #0466c8; /* Bright blue for page hover */
-  --breadcrumb: #979dac; /* Lighter gray-blue for breadcrumb */
+  --edit-color: #63B8FF; /* Light sky blue for edit buttons */
+  --edit-hover-color: #4682B4; /* Steel blue for edit hover */
+  --page-color: #4682B4; /* Steel blue for page controls */
+  --page-hover-color: #1E90FF; /* Dodger blue for page hover */
+  --breadcrumb: #2a2a2a; /* Dark breadcrumb color */
+  --custom-background-color: #cccccc;
 }
 
+
 body {
-  font-family: 'Inter', sans-serif; /* Apply Inter font family to the entire document */
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   font-size: 16px; /* Set base font size */
   line-height: 1.5; /* Set base line height */
-  color: var(--text-color);
+  /* color: var(--text-color); */
+  color: var(--primary-color);
+  background-color: var(--custom-background-color);
 }
 
 .main {
@@ -85,6 +89,7 @@ h2 {
 h3 {
   font-size: 1.5em; /* Adjust font size for h3 */
   line-height: 1.4; /* Adjust line height for h3 */
+  color: var(--primary-color);
 }
 
 h4 {
@@ -105,6 +110,7 @@ h6 {
 p {
   font-size: 1em; /* Adjust font size for paragraphs */
   line-height: 1.6; /* Adjust line height for paragraphs */
+  color: var(--primary-color);
 }
 
 a {

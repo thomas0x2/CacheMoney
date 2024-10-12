@@ -1,8 +1,8 @@
 /* InfoCard styles */
 .info-card {
     background-color: var(--primary-color);
-    border-radius: 8px;
-    padding: 20px;
+    border-radius: 6px;
+    padding: 10px;
     margin-bottom: 20px; /* Space between cards */
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   }
@@ -15,7 +15,7 @@
   
   
   .info-card-value {
-    font-size: 4em;
+    font-size: 3em;
     font-weight: bold;
     margin-bottom: 20px;
     color: var(--text-color);
