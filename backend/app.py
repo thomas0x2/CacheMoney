@@ -1,4 +1,10 @@
 from flask import Flask, request, jsonify
+from flask_cors import CORS  # Import CORS
+
+import firebase_admin
+from firebase_admin import credentials, firestore
+import datetime
+
 import os
 from werkzeug.utils import secure_filename
 from PIL import Image
@@ -11,6 +17,14 @@ from config import API_KEY, MODEL_ID
 client = Mistral(api_key=API_KEY)
 
 app = Flask(__name__)
+CORS(app)  # Enable CORS for the entire app
+
+# Initialize Firebase Firestore (assuming you already set up Firebase Admin)
+cred = credentials.Certificate("./cachemoney-95b14-e8ba240701ef.json")
+firebase_admin.initialize_app(cred)
+
+# Initialize Firestore
+db = firestore.client()
 
 UPLOAD_FOLDER = './uploads'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -18,6 +32,63 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 # Ensure the uploads folder exists
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
+
+@app.route('/api/test1', methods=['GET'])
+def get_data1():
+    return "Hello, World!"
+
+@app.route('/api/test', methods=['GET'])
+def get_data():
+    # Return a JSON response with some sample data
+    sample_data = {
+        "name": "John Doe",
+        "age": 30,
+        "occupation": "Software Developer"
+    }
+    return jsonify(sample_data)
+
+# api to add income to the database
+# Needs {userid: uid, income: ['Amount', 'Category', 'Date', 'Frequency', 'Name']} in the request body
+@app.route('/api/add_income', methods=['POST'])
+def add_income():
+    print("Income req received")
+    try:
+        # Get the data from the request
+        data = request.json
+
+        # Ensure that the request contains 'userid' and 'income'
+        if 'userid' not in data or 'income' not in data:
+            return jsonify({"error": "Missing 'userid' or 'income' in request"}), 400
+        
+        userid = data['userid']
+        income = data['income']
+        
+        # Verify that the required fields are in the income object
+        required_fields = ['Amount', 'Category', 'Date', 'Frequency', 'Name']
+        for field in required_fields:
+            if field not in income:
+                return jsonify({"error": f"Missing '{field}' in income data"}), 400
+
+        # Convert the date string to a Firestore timestamp
+        income['Date'] = datetime.datetime.strptime(income['Date'], "%d %B %Y at %H:%M:%S %Z")
+
+        # Create a reference to the Firestore document path: users/{userid}/income/{auto_generated_id}
+        income_ref = db.collection('users').document(userid).collection('income').document()
+
+        # Add the income data to Firestore
+        income_ref.set({
+            "Amount": income['Amount'],
+            "Category": income['Category'],
+            "Date": income['Date'],
+            "Frequency": income['Frequency'],
+            "Name": income['Name']
+        })
+
+        # Return success response
+        return jsonify({"success": True, "message": "Income added successfully"}), 201
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 @app.route('/api/upload', methods=['POST'])
 def upload_file():
@@ -122,4 +193,4 @@ def encode_image(image_path):
         return None
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host="0.0.0.0", debug=True)
