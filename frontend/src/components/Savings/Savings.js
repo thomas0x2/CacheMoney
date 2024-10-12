@@ -10,6 +10,7 @@ import {
   InputGroup,
   FormControl,
 } from "react-bootstrap";
+import TopbarNav from "../TopbarNav/TopbarNav";
 import SidebarNav from "../SidebarNav/SidebarNav";
 import BreadcrumbAndProfile from "../BreadcrumbAndProfile/BreadcrumbAndProfile";
 import { Line } from "react-chartjs-2";
@@ -23,7 +24,7 @@ import {
   faPenToSquare,
   faTrashCan,
   faChevronUp,
-  faChevronDown
+  faChevronDown,
 } from "@fortawesome/free-solid-svg-icons";
 import {
   Chart as ChartJS,
@@ -105,10 +106,10 @@ function Savings() {
 
   return (
     <Container fluid>
+      <Row className="topbar">
+        <TopbarNav username="Nerit Küneşko" role="Entrepreneur" />
+      </Row>
       <Row>
-        <Col md={2} className="sidebar">
-          <SidebarNav />
-        </Col>
         <Col md={10} className="main">
           <BreadcrumbAndProfile
             username="Nerit Küneşko"
