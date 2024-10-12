@@ -33,10 +33,6 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
 
-@app.route('/api/test1', methods=['GET'])
-def get_data1():
-    return "Hello, World!"
-
 @app.route('/api/test', methods=['GET'])
 def get_data():
     # Return a JSON response with some sample data
@@ -48,7 +44,7 @@ def get_data():
     return jsonify(sample_data)
 
 # api to add income to the database
-# Needs {userid: uid, income: ['Amount', 'Category', 'Date', 'Frequency', 'Name']} in the request body
+# Needs {'uid', 'Amount', 'Category', 'Date', 'Frequency', 'Name']} in the request body
 @app.route('/api/add_income', methods=['POST'])
 def add_income():
     print("Income req received")
@@ -57,31 +53,30 @@ def add_income():
         data = request.json
 
         # Ensure that the request contains 'userid' and 'income'
-        if 'userid' not in data or 'income' not in data:
-            return jsonify({"error": "Missing 'userid' or 'income' in request"}), 400
+        if 'uid' not in data:
+            return jsonify({"error": "Missing 'userid' in request"}), 400
         
-        userid = data['userid']
-        income = data['income']
+        userid = data['uid']
         
         # Verify that the required fields are in the income object
         required_fields = ['Amount', 'Category', 'Date', 'Frequency', 'Name']
         for field in required_fields:
-            if field not in income:
+            if field not in field:
                 return jsonify({"error": f"Missing '{field}' in income data"}), 400
 
         # Convert the date string to a Firestore timestamp
-        income['Date'] = datetime.datetime.strptime(income['Date'], "%d %B %Y at %H:%M:%S %Z")
+        data['Date'] = datetime.datetime.strptime(income['Date'], "%d %B %Y at %H:%M:%S %Z")
 
         # Create a reference to the Firestore document path: users/{userid}/income/{auto_generated_id}
         income_ref = db.collection('users').document(userid).collection('income').document()
 
         # Add the income data to Firestore
         income_ref.set({
-            "Amount": income['Amount'],
-            "Category": income['Category'],
-            "Date": income['Date'],
-            "Frequency": income['Frequency'],
-            "Name": income['Name']
+            "Amount": data['Amount'],
+            "Category": data['Category'],
+            "Date": data['Date'],
+            "Frequency": data['Frequency'],
+            "Name": data['Name']
         })
 
         # Return success response
