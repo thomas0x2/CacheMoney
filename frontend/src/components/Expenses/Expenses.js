@@ -1,29 +1,15 @@
-import React, { useState, useEffect, useRef } from "react";
-import {
-  Button,
-  Form,
-  Container,
-  Row,
-  Col,
-  Card,
-  InputGroup,
-  FormControl,
-  Spinner,
-} from "react-bootstrap";
-import TopbarNav from "../TopbarNav/TopbarNav";
-import BreadcrumbAndProfile from "../BreadcrumbAndProfile/BreadcrumbAndProfile";
-import * as XLSX from "xlsx";
-import { Chart as ChartJS } from "chart.js/auto";
-import { Line } from "react-chartjs-2";
-import "chartjs-adapter-date-fns";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faFileExcel,
-  faPlusCircle,
-  faCamera,
-  faImage,
-} from "@fortawesome/free-solid-svg-icons";
-import { motion } from "framer-motion";
+import React, { useState, useEffect, useRef } from 'react';
+import { Button, Form, Container, Row, Col, Card, InputGroup, FormControl, Spinner, Table, DropdownButton, Dropdown } from 'react-bootstrap';
+import TopbarNav from '../TopbarNav/TopbarNav';
+import BreadcrumbAndProfile from '../BreadcrumbAndProfile/BreadcrumbAndProfile';
+import * as XLSX from 'xlsx';
+import { Chart as ChartJS } from 'chart.js/auto';
+import { Line } from 'react-chartjs-2';
+import 'chartjs-adapter-date-fns';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faFileExcel, faPlusCircle, faCamera, faImage, faUpload } from "@fortawesome/free-solid-svg-icons";
+import { motion } from 'framer-motion';
+import InfoCard from "../InfoCard/InfoCard";
 
 function Expenses() {
   const [expenses, setExpenses] = useState(() => {
@@ -32,13 +18,15 @@ function Expenses() {
   });
   const [searchQuery, setSearchQuery] = useState("");
   const [expense, setExpense] = useState({
-    name: "",
-    amount: "",
-    date: "",
-    description: "",
-    isPaid: false,
-    category: "",
+    name: '',
+    amount: '',
+    date: '',
+    description: '',
+    category: ''
   });
+  const [successMessage, setSuccessMessage] = useState(null);
+  const [totalSavings, setTotalSavings] = useState(0);
+  const [timeRange, setTimeRange] = useState('7 Days');
   const [editing, setEditing] = useState(false);
   const [currentExpense, setCurrentExpense] = useState(null);
   const [addOption, setAddOption] = useState(null);
@@ -54,6 +42,11 @@ function Expenses() {
   useEffect(() => {
     localStorage.setItem("expenses", JSON.stringify(expenses));
   }, [expenses]);
+
+  // Helper to parse amount correctly
+  const parseAmount = (amount) => {
+    return parseFloat(amount) || 0;
+  };
 
   const exportToExcel = () => {
     const ws = XLSX.utils.json_to_sheet(expenses);
@@ -93,10 +86,10 @@ function Expenses() {
   };
 
   const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setExpense((prev) => ({
+    const { name, value } = e.target;
+    setExpense(prev => ({
       ...prev,
-      [name]: type === "checkbox" ? checked : value,
+      [name]: value
     }));
   };
 
@@ -134,8 +127,7 @@ function Expenses() {
     const newExpense = {
       ...expense,
       amount: parseFloat(expense.amount),
-      status: expense.isPaid ? "PAID" : "DUE",
-      id: editing ? currentExpense.id : Date.now(),
+      id: editing ? currentExpense.id : Date.now()
     };
 
     if (editing) {
@@ -161,53 +153,53 @@ function Expenses() {
   const handleFileChange = (event) => {
     const selectedFile = event.target.files[0];
     setFile(selectedFile); // Set the selected file in state
-    console.log("File selected:", selectedFile);
-  };
+    console.log('File selected:', selectedFile); // Debugging to ensure file is selected
+};
 
-  const handleFileSubmit = () => {
-    if (!file) {
-      alert("Please select a file before submitting.");
+const handleFileSubmit = () => {
+  if (!file) {
+      alert('Please select a file before submitting.');
       return;
-    }
+  }
 
-    const formData = new FormData();
-    formData.append("file", file);
+  const formData = new FormData();
+  formData.append('file', file);
 
-    // Show loading spinner
-    setIsLoading(true);
-    setErrorMessage(null);
+  setIsLoading(true);
+  setErrorMessage(null);
+  setSuccessMessage(null);
 
-    fetch("/api/upload", {
-      method: "POST",
+  fetch('/api/upload', {
+      method: 'POST',
       body: formData,
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        setIsLoading(false); // Hide loading spinner after request
-        if (data.error) {
-          setErrorMessage(data.error); // Set error message
-        } else {
-          console.log("File successfully submitted. Extracted data:", data);
+  })
+  .then(response => response.json())
+  .then(data => {
+      setIsLoading(false);
+      if (data.error) {
+          setErrorMessage(data.error);
+      } else {
+          console.log('File successfully submitted. Extracted data:', data);
 
-          // Add the returned data to expenses
           const newExpense = {
-            id: Date.now(), // You can replace this with a proper unique ID if needed
-            name: data.name,
-            amount: data.amount,
-            date: data.date,
-            description: data.description,
-            status: "DUE", // Assuming "DUE" for newly added expenses
-            category: "Other", // You can assign a default or a dynamic category
+              id: Date.now(),
+              name: data.name,
+              amount: parseAmount(data.amount),
+              date: data.date,
+              description: data.description,
+              category: data.category,
           };
 
-          setExpenses((prevExpenses) => [...prevExpenses, newExpense]);
-        }
-      })
-      .catch((error) => {
-        setIsLoading(false);
-        setErrorMessage("Error during file submission: " + error.message); // Display error
-      });
-  };
+          setExpenses(prevExpenses => [...prevExpenses, newExpense]);
+          setSuccessMessage("Expense added successfully!");
+          setFile(null); // Reset file input
+      }
+  })
+  .catch(error => {
+      setIsLoading(false);
+      setErrorMessage('Error during file submission: ' + error.message);
+  });
+};
 
   const startCamera = () => {
     navigator.mediaDevices
@@ -280,6 +272,18 @@ function Expenses() {
     },
   };
 
+  const getFilteredExpenses = () => {
+    const now = new Date();
+    const cutoffDate = new Date(now.getTime() - (timeRange === '24 Hours' ? 24 * 60 * 60 * 1000 : 7 * 24 * 60 * 60 * 1000));
+    
+    return expenses.filter(expense => {
+      const expenseDate = new Date(expense.date);
+      return expenseDate >= cutoffDate && expenseDate <= now;
+    });
+  };
+
+  const filteredExpenses = getFilteredExpenses();
+
   return (
     <Container fluid>
       <Row className="topbar">
@@ -296,44 +300,38 @@ function Expenses() {
               { name: "Expenses", path: "/expenses", active: true },
             ]}
           />
-          <InputGroup className="mb-3">
-            <FormControl
-              placeholder="Search expenses..."
-              value={searchQuery} // Bind input to searchQuery state
-              onChange={(e) => setSearchQuery(e.target.value)} // Update searchQuery state on input
-            />
-          </InputGroup>
 
-          {/* Display Total Expenses and Graph */}
-          <Row>
+          {/* Display Total Expenses and Total Savings */}
+          <Row className="mb-4">
             <Col md={6}>
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.3 }}
               >
-                <Card className="mt-3 total">
-                  <Card.Body>
-                    <Card.Title>Total Expense</Card.Title>
-                    <Card.Text>Total: {totalExpense.toFixed(2)} CHF</Card.Text>
-                  </Card.Body>
-                </Card>
+                <InfoCard
+                  title="Total Expense"
+                  value={`CHF ${totalExpense.toFixed(2)}`}
+                />
               </motion.div>
             </Col>
             <Col md={6}>
-              <div className="chart-container">
-                <Line data={chartData} options={chartOptions} />
-              </div>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.4 }}
+              >
+                <InfoCard
+                  title="Total Savings"
+                  value={`CHF ${totalSavings.toFixed(2)}`}
+                />
+              </motion.div>
             </Col>
           </Row>
 
           {/* Show loading spinner or error message */}
-          {isLoading && (
-            <div>
-              <Spinner animation="border" /> Submitting...
-            </div>
-          )}
-          {errorMessage && <div className="text-danger">{errorMessage}</div>}
+          {/* {isLoading && <div><Spinner animation="border" /> Submitting...</div>}
+          {errorMessage && <div className="text-danger">{errorMessage}</div>} */}
 
           {/* Buttons for different add expense options */}
           <div className="d-flex justify-content-between mt-4 mb-3 button-group">
@@ -377,7 +375,7 @@ function Expenses() {
           {/* Conditional rendering based on the selected option */}
           {addOption === "manual" && (
             <Form onSubmit={handleSubmit}>
-              <Row className="grid-row">
+              <Row className="mb-3">
                 <Col md={6}>
                   <Form.Group>
                     <Form.Control
@@ -404,44 +402,35 @@ function Expenses() {
                 </Col>
               </Row>
 
-              <Form.Group>
+              <Form.Group className="mb-3">
                 <Form.Label>Select Date</Form.Label>
-                <Row className="mb-3">
-                  <Col>
-                    <Button
-                      variant={
-                        dateOption === "today" ? "primary" : "outline-primary"
-                      }
-                      onClick={() => handleDateChange("today")}
-                    >
-                      Today
-                    </Button>
-                  </Col>
-                  <Col>
-                    <Button
-                      variant={
-                        dateOption === "yesterday"
-                          ? "primary"
-                          : "outline-primary"
-                      }
-                      onClick={() => handleDateChange("yesterday")}
-                    >
-                      Yesterday
-                    </Button>
-                  </Col>
-                  <Col>
-                    <Button
-                      variant={
-                        dateOption === "custom" ? "primary" : "outline-primary"
-                      }
-                      onClick={() => handleDateChange("custom")}
-                    >
-                      Custom
-                    </Button>
-                  </Col>
-                </Row>
+                <div className="d-flex gap-2">
+                  <Button
+                    variant={dateOption === 'today' ? 'primary' : 'secondary'}
+                    onClick={() => handleDateChange('today')}
+                    className="flex-grow-1"
+                  >
+                    Today
+                  </Button>
+                  <Button
+                    variant={dateOption === 'yesterday' ? 'primary' : 'secondary'}
+                    onClick={() => handleDateChange('yesterday')}
+                    className="flex-grow-1"
+                  >
+                    Yesterday
+                  </Button>
+                  <Button
+                    variant={dateOption === 'custom' ? 'primary' : 'secondary'}
+                    onClick={() => handleDateChange('custom')}
+                    className="flex-grow-1"
+                  >
+                    Custom
+                  </Button>
+                </div>
+              </Form.Group>
 
-                {dateOption === "custom" && (
+              {dateOption === 'custom' && (
+                <Form.Group className="mb-3">
                   <Form.Control
                     type="date"
                     name="date"
@@ -449,60 +438,70 @@ function Expenses() {
                     onChange={handleChange}
                     required
                   />
-                )}
-              </Form.Group>
+                </Form.Group>
+              )}
 
-              <Form.Group>
-                <Form.Control
-                  as="textarea"
-                  rows={3}
-                  placeholder="Description (optional)"
-                  name="description"
-                  value={expense.description}
-                  onChange={handleChange}
-                />
-              </Form.Group>
+              <Row className="mb-3">
+                <Col md={6}>
+                  <Form.Group>
+                    <Form.Control
+                      as="textarea"
+                      rows={2}
+                      placeholder="Description (optional)"
+                      name="description"
+                      value={expense.description}
+                      onChange={handleChange}
+                    />
+                  </Form.Group>
+                </Col>
+                <Col md={6}>
+                  <Form.Group>
+                    <Form.Control
+                      as="select"
+                      name="category"
+                      value={expense.category}
+                      onChange={handleChange}
+                    >
+                      <option value="">Select Category (optional)</option>
+                      {categories.map((category, index) => (
+                        <option key={index} value={category}>{category}</option>
+                      ))}
+                    </Form.Control>
+                  </Form.Group>
+                </Col>
+              </Row>
 
-              <Form.Group>
-                <Form.Control
-                  as="select"
-                  name="category"
-                  value={expense.category}
-                  onChange={handleChange}
-                >
-                  <option value="">Select Category (optional)</option>
-                  {categories.map((category, index) => (
-                    <option key={index} value={category}>
-                      {category}
-                    </option>
-                  ))}
-                </Form.Control>
-              </Form.Group>
-
-              <Form.Group>
-                <Form.Check
-                  type="checkbox"
-                  label="Paid"
-                  name="isPaid"
-                  checked={expense.isPaid}
-                  onChange={handleChange}
-                />
-              </Form.Group>
-
-              <Button variant="primary" type="submit">
+              <Button variant="primary" type="submit" className="mt-3 primary-button">
                 {editing ? "Update Expense" : "Add Expense"}
+                <FontAwesomeIcon icon={faPlusCircle} className="icon-right" />
               </Button>
             </Form>
           )}
 
-          {addOption === "picture" && (
-            <div>
-              <input type="file" onChange={handleFileChange} accept="image/*" />
-              <Button
-                onClick={handleFileSubmit}
-                className="mt-3 primary-button"
-              >
+          {addOption === 'picture' && (
+            <div className="mt-3">
+              <Form.Group controlId="formFile" className="mb-3">
+                <Form.Label>Choose an image of your expense</Form.Label>
+                <div className="custom-file-input">
+                  <Form.Control
+                    type="file"
+                    onChange={handleFileChange}
+                    accept="image/*"
+                    className="d-none"
+                  />
+                  <Button
+                    variant="outline-secondary"
+                    onClick={() => document.getElementById('formFile').click()}
+                    className="w-100 text-left d-flex justify-content-between align-items-center"
+                  >
+                    <span>{file ? file.name : 'Browse...'}</span>
+                    <FontAwesomeIcon icon={faUpload} />
+                  </Button>
+                </div>
+              </Form.Group>
+              <Button onClick={handleFileSubmit} className="mt-3 primary-button">
                 Submit Picture
+                <FontAwesomeIcon icon={faUpload} className="icon-right" />
               </Button>
             </div>
           )}
@@ -521,6 +520,74 @@ function Expenses() {
               </Button>
             </div>
           )}
+
+          {/* Show loading spinner or error message */}
+          {isLoading && (
+            <div className="text-center mt-3">
+              <Spinner animation="border" role="status">
+                <span className="visually-hidden">Loading...</span>
+              </Spinner>
+              <p className="mt-2">Submitting...</p>
+            </div>
+          )}
+          {successMessage && <div className="text-success mt-3">{successMessage}</div>}
+          {errorMessage && <div className="text-danger mt-3">{errorMessage}</div>}
+
+
+          {/* Table to display the expenses */}
+          <Row className="mb-5 mt-4">
+            <Col md={12} className="expense-tracker">
+              <div className="d-flex justify-content-between align-items-center mb-3">
+                <h2 className="expense-tracker-title">Expense Tracker</h2>
+                <DropdownButton
+                  id="dropdown-time-range"
+                  title={`Showing: Last ${timeRange}`}
+                  variant="secondary"
+                  onSelect={(e) => setTimeRange(e)}
+                >
+                  <Dropdown.Item eventKey="24 Hours">Last 24 Hours</Dropdown.Item>
+                  <Dropdown.Item eventKey="7 Days">Last 7 Days</Dropdown.Item>
+                </DropdownButton>
+              </div>
+              
+              {/* Search bar moved above the table */}
+              <InputGroup className="mb-3">
+                <FormControl
+                  placeholder="Search expenses..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </InputGroup>
+              <Table striped bordered hover className="styled-expense-table">
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Category</th>
+                    <th>Description</th>
+                    <th>Amount</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredExpenses.length > 0 ? (
+                    filteredExpenses.map((expense, index) => (
+                      <tr key={index}>
+                        <td>{expense.date}</td>
+                        <td>{expense.category}</td>
+                        <td>{expense.description}</td>
+                        <td>{expense.amount.toFixed(2)} CHF</td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="4" className="text-center">
+                        No expenses found for the selected time range.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </Table>
+            </Col>
+          </Row>
         </Col>
       </Row>
     </Container>

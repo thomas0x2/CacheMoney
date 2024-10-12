@@ -10,7 +10,7 @@ function BreadcrumbAndProfile({ username, role, breadcrumbItems, pageTitle }) {
   if (pageTitle === "Incomes") {
     welcomeMessage = `${username}, here are your incomes...`;
   } else if (pageTitle === "Expenses") {
-    welcomeMessage = `${username}, here are your expenses...`;
+    welcomeMessage = `${username}, here are your expenses:`;
   } else if (pageTitle === "Dashboard") {
     welcomeMessage = `Welcome back, ${username}`;
     financialStatusSummary =
@@ -36,7 +36,7 @@ function BreadcrumbAndProfile({ username, role, breadcrumbItems, pageTitle }) {
       </div>
       <div>
         <h3>{welcomeMessage}</h3>
-        <p>{financialStatusSummary}</p>
+        {/* <p>{financialStatusSummary}</p> */}
       </div>
     </>
   );

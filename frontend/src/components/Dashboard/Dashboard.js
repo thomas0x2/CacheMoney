@@ -263,45 +263,6 @@ function Dashboard({
               </Table>
             </Col>
           </Row>
-
-          {/* Section for news cards */}
-          <div className="news-section">
-            <h2 className="news-section-title">Latest News</h2>
-            <div className="news-cards">
-              <Row>
-                <Col md={4} xs={12} className="mb-3">
-                  <NewsCard
-                    topic="personal-finance"
-                    image={`${process.env.PUBLIC_URL}/images/News/finance.jpg`}
-                    alt="personal finance"
-                    title="Unlocking Financial Freedom: Your Guide to Smart Money Moves"
-                    description="Discover the secrets to financial success! From savvy investing strategies to practical budgeting tips, empower yourself to achieve your financial dreams and live life on your terms."
-                    className="news-card news-card-small"
-                  />
-                </Col>
-                <Col md={4} xs={12} className="mb-3">
-                  <NewsCard
-                    topic="freelancing"
-                    image={`${process.env.PUBLIC_URL}/images/News/freelancing.jpg`}
-                    alt="freelancing"
-                    title="Thriving in the Gig Economy: Insider Tips for Freelancers"
-                    description="Join the booming world of freelancing! Get insider insights, expert advice, and actionable tips to excel in the gig economy. From finding lucrative gigs to mastering time management, embark on your journey to freelancing success."
-                    className="news-card news-card-small"
-                  />
-                </Col>
-                <Col md={4} xs={12} className="mb-3">
-                  <NewsCard
-                    topic="budgeting"
-                    image={`${process.env.PUBLIC_URL}/images/News/budgeting.jpg`}
-                    alt="budgeting"
-                    title="Mastering Your Money: The Art of Stress-Free Budgeting"
-                    description="Take control of your finances and transform your life! Learn the art of stress-free budgeting, streamline your expenses, and achieve financial peace of mind. Say goodbye to money worries and hello to a brighter financial future!"
-                    className="news-card news-card-small"
-                  />
-                </Col>
-              </Row>
-            </div>
-          </div>
         </Col>
       </Row>
     </Container>

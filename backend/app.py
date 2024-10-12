@@ -26,6 +26,16 @@ firebase_admin.initialize_app(cred)
 # Initialize Firestore
 db = firestore.client()
 
+@app.route('/api/test', methods=['GET'])
+def get_data():
+    # Return a JSON response with some sample data
+    sample_data = {
+        "name": "John Doe",
+        "age": 30,
+        "occupation": "Software Developer"
+    }
+    return jsonify(sample_data)
+
 UPLOAD_FOLDER = './uploads'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
@@ -107,34 +117,46 @@ def upload_file():
 def process_image(image_path):
     try:
         # Step 1: Resize and compress the image
-        resized_image_path = resize_and_compress_image(image_path)
+        # resized_image_path = resize_and_compress_image(image_path)
 
-        if resized_image_path is None:
-            return {"error": "Failed to process image"}
+        # if resized_image_path is None:
+        #     return {"error": "Failed to process image"}
 
         # Step 2: Convert the image to Base64
-        base64_image = encode_image(resized_image_path)
+        base64_image = encode_image(image_path)
 
         if base64_image is None:
             return {"error": "Failed to encode image"}
 
-        # Step 3: Prepare the prompt for Mistral to extract bill info
-        prompt = f"""
-        Extract the following information from the provided image of a bill:
-        1. Total price or total amount of expense as a number!
-        2. Name of the expense
-        3. Date of the bill
-        4. A short description of the expense
-        5. Category of the bill with the options: ['Utility', 'Rent', 'Groceries', 'Entertainment', 'Other']
+        # Step 3: Prepare the messages for Mistral API
+        messages = [
+            {
+                "role": "user",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": """
+                        Extract the following information from the provided image of a bill:
+                        1. Total price or total amount of expense as a number!
+                        2. Name of the expense
+                        3. Date of the bill
+                        4. A short description of the expense
+                        5. Category of the bill with the options: ['Utility', 'Rent', 'Groceries', 'Entertainment', 'Other']
 
-        Return the extracted information with the following JSON fields:
-        "amount", "name", "date", "description", "category"
-
-        Here is a picture of the bill: {base64_image}
-        """
+                        Return the extracted information with the following JSON fields:
+                        "amount", "name", "date", "description", "category"
+                        """
+                    },
+                    {
+                        "type": "image_url",
+                        "image_url": f"data:image/jpeg;base64,{base64_image}"
+                    }
+                ]
+            }
+        ]
 
         # Step 4: Call the Mistral API
-        response = call_mistral_api(prompt)
+        response = call_mistral_api(messages)
 
         if 'error' in response:
             return {"error": "Failed to get response from Mistral"}
@@ -145,16 +167,12 @@ def process_image(image_path):
     except Exception as e:
         return {"error": str(e)}
 
-
-def call_mistral_api(prompt):
-    """Call Mistral API with the given prompt to extract bill info."""
+def call_mistral_api(messages):
+    """Call Mistral API with the given messages to extract bill info."""
     try:
         chat_response = client.chat.complete(
             model=MODEL_ID,
-            messages=[{
-                "role": "user",
-                "content": prompt
-            }],
+            messages=messages,
             response_format={"type": "json_object"}  # This ensures the response is in JSON format
         )
 
