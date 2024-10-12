@@ -4,6 +4,7 @@ from flask_cors import CORS  # Import CORS
 import firebase_admin
 from firebase_admin import credentials, firestore
 import datetime
+from google.cloud.firestore import Timestamp
 
 import os
 from werkzeug.utils import secure_filename
@@ -26,8 +27,7 @@ firebase_admin.initialize_app(cred)
 # Initialize Firestore
 db = firestore.client()
 
-# Get last 7 days expenses
-@app.route('/api/expenses/last7days', methods=['GET'])
+@app.route('/api/expense/last7days', methods=['GET'])
 def get_last_7_days_expenses():
     try:
         # Get the 'userid' from the request arguments (URL query params)
@@ -36,13 +36,16 @@ def get_last_7_days_expenses():
         if not userid:
             return jsonify({"error": "Missing 'userid' in query parameters"}), 400
 
-        # Calculate the date 7 days ago from today
-        today = datetime.datetime.now()
-        seven_days_ago = today - datetime.timedelta(days=7)
+        # Calculate the date 7 days ago from now
+        now = datetime.datetime.now()
+        seven_days_ago = now - datetime.timedelta(days=7)
+
+        # Convert the date to Firestore Timestamp
+        seven_days_ago_timestamp = Timestamp(seven_days_ago, 0)
 
         # Query Firestore for expenses in the last 7 days
         expenses_ref = db.collection('users').document(userid).collection('expenses')
-        query = expenses_ref.where('date', '>=', seven_days_ago).order_by('date', direction=firestore.Query.DESCENDING)
+        query = expenses_ref.where('Date', '>=', seven_days_ago_timestamp).order_by('Date', direction=firestore.Query.DESCENDING)
         expenses = query.stream()
 
         # Collect the results into a list
@@ -51,11 +54,11 @@ def get_last_7_days_expenses():
             expense_data = expense.to_dict()
             expenses_list.append({
                 "id": expense.id,  # Include the document ID
-                "amount": expense_data.get('amount'),
-                "category": expense_data.get('category'),
-                "date": expense_data.get('date').strftime("%Y-%m-%d %H:%M:%S"),  # Convert timestamp to string
-                "description": expense_data.get('description'),
-                "name": expense_data.get('name')
+                "amount": expense_data.get('Amount'),
+                "category": expense_data.get('Category'),
+                "date": expense_data.get('Date').strftime("%Y-%m-%d %H:%M:%S"),  # Convert timestamp to string
+                "description": expense_data.get('Description'),
+                "name": expense_data.get('Name')
             })
 
         return jsonify({"expenses": expenses_list}), 200
@@ -63,7 +66,7 @@ def get_last_7_days_expenses():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-@app.route('/api/expenses/last24hours', methods=['GET'])
+@app.route('/api/expense/last24hours', methods=['GET'])
 def get_last_24_hours_expenses():
     try:
         # Get the 'userid' from the request arguments (URL query params)
@@ -75,6 +78,9 @@ def get_last_24_hours_expenses():
         # Calculate the date 24 hours ago from now
         now = datetime.datetime.now()
         twenty_four_hours_ago = now - datetime.timedelta(hours=24)
+        
+        # Convert to Firestore timestamp
+        twenty_four_hours_ago = Timestamp(twenty_four_hours_ago, 0)
 
         # Query Firestore for expenses in the last 24 hours
         expenses_ref = db.collection('users').document(userid).collection('expenses')
@@ -87,24 +93,17 @@ def get_last_24_hours_expenses():
             expense_data = expense.to_dict()
             expenses_list.append({
                 "id": expense.id,  # Include the document ID
-                "amount": expense_data.get('amount'),
-                "category": expense_data.get('category'),
-                "date": expense_data.get('date').strftime("%Y-%m-%d %H:%M:%S"),  # Convert timestamp to string
-                "description": expense_data.get('description'),
-                "name": expense_data.get('name')
+                "amount": expense_data.get('Amount'),
+                "category": expense_data.get('Category'),
+                "date": expense_data.get('Date').strftime("%Y-%m-%d %H:%M:%S"),  # Convert timestamp to string
+                "description": expense_data.get('Description'),
+                "name": expense_data.get('Name')
             })
 
         return jsonify({"expenses": expenses_list}), 200
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
-UPLOAD_FOLDER = './uploads'
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-
-# Ensure the uploads folder exists
-if not os.path.exists(UPLOAD_FOLDER):
-    os.makedirs(UPLOAD_FOLDER)
 
 # api to add income to the database
 # Needs {'uid', 'Amount', 'Category', 'Date', 'Frequency', 'Name']} in the request body
@@ -186,6 +185,13 @@ def add_expense():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+UPLOAD_FOLDER = './uploads'
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+# Ensure the uploads folder exists
+if not os.path.exists(UPLOAD_FOLDER):
+    os.makedirs(UPLOAD_FOLDER)
 
 @app.route('/api/upload', methods=['POST'])
 def upload_file():
