@@ -1,0 +1,11 @@
+.ring-col svg {
+  margin-bottom: 10px;
+}
+
+.ring-col p {
+  margin-bottom: 5px;
+}
+
+.ring-col .text-muted {
+  font-size: 0.8em;
+}

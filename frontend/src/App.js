@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, createContext, useContext } from "react";
 import { HashRouter as Router, Routes, Route } from "react-router-dom";
 import SignIn from "./components/SignIn/SignIn";
 import Dashboard from "./components/Dashboard/Dashboard";
@@ -8,9 +8,23 @@ import SignOut from "./components/SignOut/SignOut";
 import Target from "./components/Target/Target";
 import Savings from "./components/Savings/Savings";
 import AuthenticatedRoute from "./components/Auth/AuthenticatedRoute";
-import { UserProvider } from "./components/Auth/UserContext"; // Import UserProvider
-
+import { UserProvider } from "./components/Auth/UserContext";
 import "./App.css";
+
+const GlobalContext = createContext();
+
+export const GlobalProvider = ({ children }) => {
+  const [savingTarget, setSavingTarget] = useState(0);
+  const [totalSavings, setTotalSavings] = useState(0);
+
+  return (
+    <GlobalContext.Provider value={{ savingTarget, setSavingTarget, totalSavings, setTotalSavings }}>
+      {children}
+    </GlobalContext.Provider>
+  );
+};
+
+export const useGlobalContext = () => useContext(GlobalContext);
 
 function App() {
   const [incomes, setIncomes] = useState(() => {
@@ -26,13 +40,13 @@ function App() {
   // Calculate total incomes
   const totalIncomes = incomes.reduce(
     (total, income) => total + parseFloat(income.amount),
-    0
+    0,
   );
 
   // Calculate total expenses
   const totalExpenses = expenses.reduce(
     (total, expense) => total + parseFloat(expense.amount),
-    0
+    0,
   );
 
   // Persist incomes and expenses to localStorage
@@ -45,43 +59,45 @@ function App() {
   }, [expenses]);
 
   return (
-    <UserProvider>
-      <Router>
-        <Routes>
-          <Route path="/" element={<SignIn />} />
-          <Route
-            path="/dashboard"
-            element={
-              <AuthenticatedRoute>
-                <Dashboard
-                  totalIncomes={totalIncomes}
-                  totalExpenses={totalExpenses}
-                />
-              </AuthenticatedRoute>
-            }
-          />
-          <Route
-            path="/incomes"
-            element={
-              <AuthenticatedRoute>
-                <Incomes incomes={incomes} setIncomes={setIncomes} />
-              </AuthenticatedRoute>
-            }
-          />
-          <Route
-            path="/expenses"
-            element={
-              <AuthenticatedRoute>
-                <Expenses expenses={expenses} setExpenses={setExpenses} />
-              </AuthenticatedRoute>
-            }
-          />
-          <Route path="/signout" element={<SignOut />} />
-          <Route path="/target" element={<Target />} />
-          <Route path="/savings" element={<Savings />} />
-        </Routes>
-      </Router>
-    </UserProvider>
+    <GlobalProvider>
+      <UserProvider>
+        <Router>
+          <Routes>
+            <Route path="/" element={<SignIn />} />
+            <Route
+              path="/dashboard"
+              element={
+                <AuthenticatedRoute>
+                  <Dashboard
+                    totalIncomes={totalIncomes}
+                    totalExpenses={totalExpenses}
+                  />
+                </AuthenticatedRoute>
+              }
+            />
+            <Route
+              path="/incomes"
+              element={
+                <AuthenticatedRoute>
+                  <Incomes incomes={incomes} setIncomes={setIncomes} />
+                </AuthenticatedRoute>
+              }
+            />
+            <Route
+              path="/expenses"
+              element={
+                <AuthenticatedRoute>
+                  <Expenses expenses={expenses} setExpenses={setExpenses} />
+                </AuthenticatedRoute>
+              }
+            />
+            <Route path="/signout" element={<SignOut />} />
+            <Route path="/target" element={<Target />} />
+            <Route path="/savings" element={<Savings />} />
+          </Routes>
+        </Router>
+      </UserProvider>
+    </GlobalProvider>
   );
 }
 

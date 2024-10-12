@@ -9,6 +9,7 @@ import {
   Dropdown,
   DropdownButton,
 } from "react-bootstrap";
+import { useGlobalContext } from "../../App"
 import TopbarNav from "../TopbarNav/TopbarNav";
 import SidebarNav from "../SidebarNav/SidebarNav";
 import BreadcrumbAndProfile from "../BreadcrumbAndProfile/BreadcrumbAndProfile";
@@ -22,6 +23,7 @@ import { motion } from "framer-motion";
 // Add this line to get User Data
 import { UserContext } from "../Auth/UserContext"; // Import UserContext
 
+
 function Dashboard({
   totalIncomes,
   totalExpenses,
@@ -32,6 +34,8 @@ function Dashboard({
 
   // Add this line to get User Data
   const user = useContext(UserContext);
+  const { savingTarget } = useGlobalContext();
+  const { totalSavings } = useGlobalContext();
 
   // Get user data like the following
   console.log(user.displayName, user.uid, user.photoURL);
@@ -158,7 +162,7 @@ function Dashboard({
               >
                 <InfoCard
                   title="Monthly Target"
-                  value={`CHF ${monthlyTarget}`}
+                  value={`CHF ${savingTarget}`}
                   linkText="Set your target"
                   linkTo="/target"
                 />
@@ -172,7 +176,7 @@ function Dashboard({
               >
                 <InfoCard
                   title="Savings This Month"
-                  value={`CHF ${monthlySavings}`}
+                  value={`CHF ${totalSavings}`}
                   linkText="View savings details"
                   linkTo="/savings"
                 />

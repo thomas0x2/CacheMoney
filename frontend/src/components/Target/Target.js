@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import {
   Button,
   Form,
@@ -10,6 +10,7 @@ import {
   InputGroup,
   FormControl,
 } from "react-bootstrap";
+import { useGlobalContext } from "../../App"
 import TopbarNav from "../TopbarNav/TopbarNav";
 import SidebarNav from "../SidebarNav/SidebarNav";
 import BreadcrumbAndProfile from "../BreadcrumbAndProfile/BreadcrumbAndProfile";
@@ -18,12 +19,23 @@ import "chartjs-adapter-date-fns";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 
-function TargetSettingMenu({ onSaveTarget }) {
-  const [targetAmount, setTargetAmount] = useState('');
+function TargetSettingMenu() {
+  const context = useGlobalContext();
+
+  if (!context) {
+    return <div>Error: Global context is not available</div>;
+  }
+
+  const { savingTarget, setSavingTarget } = context;
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSaveTarget(parseFloat(targetAmount));
+    // Update the global context directly
+    setSavingTarget(parseFloat(savingTarget) || 0);
+  };
+
+  const handleChange = (e) => {
+    setSavingTarget(e.target.value);
   };
 
   return (
@@ -32,8 +44,8 @@ function TargetSettingMenu({ onSaveTarget }) {
         <Form.Label>Set your monthly savings target</Form.Label>
         <Form.Control
           type="number"
-          value={targetAmount}
-          onChange={(e) => setTargetAmount(e.target.value)}
+          value={savingTarget}
+          onChange={handleChange}
           placeholder="Enter amount"
         />
       </Form.Group>
