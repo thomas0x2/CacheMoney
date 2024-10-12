@@ -3,8 +3,7 @@ from flask_cors import CORS  # Import CORS
 
 import firebase_admin
 from firebase_admin import credentials, firestore
-import datetime
-from google.protobuf.timestamp_pb2 import Timestamp 
+from datetime import datetime, timedelta
 
 import os
 from werkzeug.utils import secure_filename
@@ -13,6 +12,9 @@ import base64
 from mistralai import Mistral
 import logging
 from config import API_KEY, MODEL_ID
+
+import logging
+logging.basicConfig(level=logging.DEBUG)
 
 # Set up Mistral API client
 client = Mistral(api_key=API_KEY)
@@ -33,26 +35,18 @@ def get_last_7_days_expenses():
         # Get the 'userid' from the request arguments (URL query params)
         userid = request.args.get('userid')
 
-        print(userid)
-
         if not userid:
             return jsonify({"error": "Missing 'userid' in query parameters"}), 400
 
         # Calculate the date 7 days ago from now
-        now = datetime.datetime.now()
-        seven_days_ago = now - datetime.timedelta(days=7)
+        now = datetime.now()
+        seven_days_ago = now - timedelta(days=7)
 
-        # Create a Firestore Timestamp from the Python datetime object
-        seven_days_ago_timestamp = Timestamp()
-        seven_days_ago_timestamp.FromDatetime(seven_days_ago)
-
+        # Firestore can handle Python's datetime object directly
         # Query Firestore for expenses in the last 7 days
         expenses_ref = db.collection('users').document(userid).collection('expenses')
-
-        print(expenses_ref)
-        query = expenses_ref.where('Date', '>=', seven_days_ago_timestamp).order_by('Date', direction=firestore.Query.DESCENDING)
+        query = expenses_ref.where('Date', '>=', seven_days_ago).order_by('Date', direction=firestore.Query.DESCENDING)
         expenses = query.stream()
-
 
         # Collect the results into a list
         expenses_list = []
@@ -72,6 +66,43 @@ def get_last_7_days_expenses():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+@app.route('/api/expense/last30days', methods=['GET'])
+def get_last_7_days_expenses():
+    try:
+        # Get the 'userid' from the request arguments (URL query params)
+        userid = request.args.get('userid')
+
+        if not userid:
+            return jsonify({"error": "Missing 'userid' in query parameters"}), 400
+
+        # Calculate the date 7 days ago from now
+        now = datetime.now()
+        seven_days_ago = now - timedelta(days=30)
+
+        # Firestore can handle Python's datetime object directly
+        # Query Firestore for expenses in the last 7 days
+        expenses_ref = db.collection('users').document(userid).collection('expenses')
+        query = expenses_ref.where('Date', '>=', seven_days_ago).order_by('Date', direction=firestore.Query.DESCENDING)
+        expenses = query.stream()
+
+        # Collect the results into a list
+        expenses_list = []
+        for expense in expenses:
+            expense_data = expense.to_dict()
+            expenses_list.append({
+                "id": expense.id,  # Include the document ID
+                "amount": expense_data.get('Amount'),
+                "category": expense_data.get('Category'),
+                "date": expense_data.get('Date').strftime("%Y-%m-%d %H:%M:%S"),  # Convert timestamp to string
+                "description": expense_data.get('Description'),
+                "name": expense_data.get('Name')
+            })
+
+        return jsonify({"expenses": expenses_list}), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500    
+
 @app.route('/api/expense/last24hours', methods=['GET'])
 def get_last_24_hours_expenses():
     try:
@@ -82,15 +113,13 @@ def get_last_24_hours_expenses():
             return jsonify({"error": "Missing 'userid' in query parameters"}), 400
 
         # Calculate the date 24 hours ago from now
-        now = datetime.datetime.now()
-        twenty_four_hours_ago = now - datetime.timedelta(hours=24)
-        
-        # Convert to Firestore timestamp
-        twenty_four_hours_ago = Timestamp(twenty_four_hours_ago, 0)
+        now = datetime.now()
+        twenty_four_hours_ago = now - timedelta(hours=24)
 
+        # Firestore can handle Python's datetime object directly
         # Query Firestore for expenses in the last 24 hours
         expenses_ref = db.collection('users').document(userid).collection('expenses')
-        query = expenses_ref.where('date', '>=', twenty_four_hours_ago).order_by('date', direction=firestore.Query.DESCENDING)
+        query = expenses_ref.where('Date', '>=', twenty_four_hours_ago).order_by('Date', direction=firestore.Query.DESCENDING)
         expenses = query.stream()
 
         # Collect the results into a list

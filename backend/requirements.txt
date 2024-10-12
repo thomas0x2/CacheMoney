@@ -11,3 +11,4 @@ google-cloud-core
 google-api-core 
 protobuf 
 pytz
+logging
