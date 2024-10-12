@@ -6,6 +6,7 @@ import Incomes from './components/Incomes/Incomes';
 import Expenses from './components/Expenses/Expenses';
 import SignOut from './components/SignOut/SignOut';
 import Target from './components/Target/Target';
+import Savings from './components/Savings/Savings'
 import './App.css';
 
 function App() {
@@ -43,6 +44,7 @@ function App() {
         <Route path="/expenses" element={<Expenses expenses={expenses} setExpenses={setExpenses} />} />
         <Route path="/signout" element={<SignOut />} />
         <Route path="/target" element={<Target />} />
+        <Route path="/savings" element={<Savings />} />
       </Routes>
     </Router>
   );

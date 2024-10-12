@@ -64,7 +64,7 @@ function Target() {
             breadcrumbItems={[
               { name: "Dashboard", path: "/dashboard", active: false },
               { name: "Target", path: "/target", active: true },
-            ]}
+            ]}target
           />
           <Row className="mt-4">
             <Col md={6}>

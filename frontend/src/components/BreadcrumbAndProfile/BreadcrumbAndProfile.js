@@ -17,6 +17,8 @@ function BreadcrumbAndProfile({ username, role, breadcrumbItems, pageTitle }) {
   } else if(pageTitle == 'Set Target') {
     welcomeMessage = `${username}, how much do you want to save?`;
     financialStatusSummary = ""
+  } else if (pageTitle == 'Savings') {
+    welcomeMessage = `${username}, here are your savings...`
   }
 
   return (
