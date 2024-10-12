@@ -3,70 +3,84 @@
   display: flex;
   align-items: center;
   margin-bottom: 20px;
-  border-bottom: 2px solid var(--breadcrumb);
+  border-bottom: 2px solid var(--breadcrumb); /* Dark border to contrast */
+  color: var(--text-color); /* Light text color for visibility */
 }
 
+.user-info .profile {
+  display: flex;
+  align-items: center;
+}
 
+.user-info .user-image {
+  width: 50px; /* Fixed width for user image */
+  height: 50px; /* Fixed height and make it round */
+  border-radius: 50%;
+  margin-right: 15px;
+  border: 2px solid var(--secondary-color); /* Adding a border for better contrast */
+}
+
+.user-info h1 {
+  color: var(--primary-color); /* Ensure header is readable */
+}
+
+.user-info h3 {
+  font-size: 1.5rem;
+  color: var(--primary-color); /* Secondary color for welcome message */
+  font-weight: 500; /* Make it slightly bolder */
+}
+
+.user-info p {
+  font-size: 1rem;
+  color: var(--primary-color); /* Text color for better readability */
+  opacity: 0.85; /* Slight transparency for subtle effect */
+}
+
+@media (max-width: 768px) {
+  .custom-breadcrumb {
+    font-size: 14px; /* Adjust font size for responsiveness */
+  }
+
+  .profile {
+      display: none;
+  }
+}
+
+/* Media query for iPad screens (between 577px and 768px) */
+@media (min-width: 577px) and (max-width: 768px) {
+
+  .main-content {
+    padding: 10px;
+  }
+  
+  .user-info {
+      display: none;
+  }
+  
   .user-info .profile {
-    display: flex;
-    align-items: center;
+      display: none;
   }
   
   .user-info .user-image {
-    width: 50px; /* Fixed width for user image */
-    height: 50px; /* Fixed height and make it round */
-    border-radius: 50%;
-    margin-right: 15px;
-  }  
-
-  @media (max-width: 768px) {
-    .custom-breadcrumb {
-      font-size: 14px; /* Adjust font size for responsiveness */
-    }
-
-    .profile {
-        display: none;
-    }
+      display: none;
   }
-  
+}
 
-  /* Media query for iPad screens (between 577px and 768px) */
-@media (min-width: 577px) and (max-width: 768px) {
-
+@media (max-width: 576px) {
+    
     .main-content {
       padding: 10px;
     }
     
     .user-info {
-        display: none;
+      display: none;
     }
     
     .user-info .profile {
-        display: none;
+      display: none;
     }
     
     .user-info .user-image {
-        display: none;
+      display: none;
     }
   }
-  
-  
-  @media (max-width: 576px) {
-      
-      .main-content {
-        padding: 10px;
-      }
-      
-      .user-info {
-        display: none;
-      }
-      
-      .user-info .profile {
-        display: none;
-      }
-      
-      .user-info .user-image {
-        display: none;
-      }
-    }
-    

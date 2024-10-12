@@ -9,6 +9,7 @@ import 'chartjs-adapter-date-fns';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faFileExcel, faArrowCircleLeft, faArrowCircleRight, faPlusCircle, faPenToSquare, faTrashCan } from '@fortawesome/free-solid-svg-icons';
 import { motion } from 'framer-motion';
+import { faCamera, faImage } from "@fortawesome/free-solid-svg-icons";
 
 function Expenses() {
   const [expenses, setExpenses] = useState(() => {
@@ -97,6 +98,19 @@ function Expenses() {
     setCurrentExpense(null);
     setCategory('');
     setAddOption(null);
+  };
+
+  const handleFileChange = (event) => {
+    // Handle file selection
+    const file = event.target.files[0];
+    // You can add logic here to process the file
+    console.log('File selected:', file);
+  };
+
+  const handleFileSubmit = () => {
+    // Handle file submission
+    // You can add logic here to process and submit the file
+    console.log('File submitted');
   };
 
   const handleRemove = (id) => {
@@ -193,10 +207,25 @@ function Expenses() {
 
           {/* Buttons for different add expense options */}
           <div className="d-flex justify-content-between mt-4 mb-3 button-group">
-            <Button variant="secondary" className="add-expense-btn" onClick={() => handleOptionClick('google-wallet')}>Add through Google Wallet</Button>
-            <Button variant="secondary" className="add-expense-btn" onClick={() => handleOptionClick('camera')}>Add through Camera</Button>
-            <Button variant="secondary" className="add-expense-btn" onClick={() => handleOptionClick('picture')}>Add through Picture</Button>
-            <Button variant="primary" className="add-expense-btn" onClick={() => handleOptionClick('manual')}>Add Manually</Button>
+            <Button variant="secondary" className="mt-3 primary-button" onClick={() => handleOptionClick('google-wallet')}>
+              Add through Google Wallet
+              <FontAwesomeIcon icon={faPlusCircle} className="icon-right" />
+            </Button>
+            
+            <Button variant="secondary" className="mt-3 primary-button" onClick={() => handleOptionClick('camera')}>
+              Add through Camera
+              <FontAwesomeIcon icon={faCamera} className="icon-right" />
+            </Button>
+
+            <Button variant="secondary" className="mt-3 primary-button" onClick={() => handleOptionClick('picture')}>
+              Add through Picture
+              <FontAwesomeIcon icon={faImage} className="icon-right" />
+            </Button>
+
+            <Button variant="primary" className="mt-3 primary-button" onClick={() => handleOptionClick('manual')}>
+              Add Manually
+              <FontAwesomeIcon icon={faPlusCircle} className="icon-right" />
+            </Button>
           </div>
 
           {/* Conditional rendering based on the selected option */}
