@@ -45,8 +45,8 @@ function Dashboard({ totalIncomes, totalExpenses, monthlyTarget = 5000, monthlyS
         </Col>
         <Col md={10} className="main-content main">
           <BreadcrumbAndProfile 
-            username="Mr. French Pitbull" 
-            role="Freelancer React Developer" 
+            username="Nerit Küneşko" 
+            role="Entrepreneur" 
             pageTitle="Dashboard"
             breadcrumbItems={[
               { name: 'Dashboard', path: '/dashboard', active: true },
@@ -64,7 +64,7 @@ function Dashboard({ totalIncomes, totalExpenses, monthlyTarget = 5000, monthlyS
               >
                 <InfoCard
                   title="Monthly Target"
-                  value={`$${monthlyTarget}`}
+                  value={`CHF ${monthlyTarget}`}
                   linkText="Set your target"
                   linkTo="/target"
                 />
@@ -78,7 +78,7 @@ function Dashboard({ totalIncomes, totalExpenses, monthlyTarget = 5000, monthlyS
               >
                 <InfoCard
                   title="Savings This Month"
-                  value={`$${monthlySavings}`}
+                  value={`CHF ${monthlySavings}`}
                   linkText="View savings details"
                   linkTo="/savings"
                 />
@@ -96,7 +96,7 @@ function Dashboard({ totalIncomes, totalExpenses, monthlyTarget = 5000, monthlyS
               >
                 <InfoCard
                   title="Incomes"
-                  value={`$${totalIncomes}`}
+                  value={`CHF ${totalIncomes}`}
                   linkText="Add or manage your Income"
                   linkTo="/incomes"
                 />
@@ -110,7 +110,7 @@ function Dashboard({ totalIncomes, totalExpenses, monthlyTarget = 5000, monthlyS
               >
                 <InfoCard
                   title="Expenses"
-                  value={`$${totalExpenses}`}
+                  value={`CHF ${totalExpenses}`}
                   linkText="Add or manage your expenses"
                   linkTo="/expenses"
                 />

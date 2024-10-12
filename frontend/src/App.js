@@ -5,6 +5,7 @@ import Dashboard from './components/Dashboard/Dashboard';
 import Incomes from './components/Incomes/Incomes';
 import Expenses from './components/Expenses/Expenses';
 import SignOut from './components/SignOut/SignOut';
+import Target from './components/Target/Target';
 import './App.css';
 
 function App() {
@@ -41,6 +42,7 @@ function App() {
         <Route path="/incomes" element={<Incomes incomes={incomes} setIncomes={setIncomes} />} />
         <Route path="/expenses" element={<Expenses expenses={expenses} setExpenses={setExpenses} />} />
         <Route path="/signout" element={<SignOut />} />
+        <Route path="/target" element={<Target />} />
       </Routes>
     </Router>
   );

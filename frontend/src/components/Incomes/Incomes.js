@@ -166,8 +166,8 @@ function Incomes() {
         </Col>
         <Col md={10} className="main">
         <BreadcrumbAndProfile 
-           username="Mr. French Pitbull" 
-          role="Freelancer React Developer" 
+           username="Nerit Küneşko" 
+          role="Entrepreneur" 
           pageTitle="Incomes"
           breadcrumbItems={[
           { name: 'Dashboard', path: '/dashboard', active: false },
