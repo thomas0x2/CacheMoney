@@ -1,80 +1,82 @@
 .top-navbar {
   box-shadow: 0 1px 3px rgba(0,0,0,.2);
   background-color: var(--background-color) !important;
-  padding: 0.5rem 0;
+  padding: 0.25rem 0;
 }
+
 .navbar-collapse {
   flex-basis: auto;
 }
 
-.exit-link {
-  white-space: nowrap;
+.top-navbar .navbar-brand {
+  padding: 0;
+  margin-right: 2rem;
 }
 
-.user-info {
-  font-size: 0.8rem;
-  line-height: 1.2;
+.brand-logo img {
+  height: 40px;
+  width: auto;
 }
 
 .top-navbar .navbar-nav {
-  padding-top: 10px;
-}
-
-.top-navbar .navbar-brand {
-  padding-top: 10px;
-}
-
-.brand-text {
-  font-family: Helvetica, Arial, sans-serif;
-  font-weight: bold;
-  font-size: 1.3rem;
-  color: var(--text-color);
-  text-transform: uppercase;
-}
-
-.brand-text::first-line {
-  font-size: 1.1em;
-}
-
-.brand-text span {
-  font-size: 0.8em;
+  padding-top: 8px;
+  align-items: center;
 }
 
 .top-navbar .nav-link {
   color: var(--text-color) !important;
   transition: color 0.3s ease;
+  padding-top: 6px;
+  padding-bottom: 6px;
 }
 
 .top-navbar .nav-link:hover {
   color: var(--hover-color) !important;
 }
 
-.profile {
-  white-space: nowrap;
+.user-profile-container {
   display: flex;
   align-items: center;
 }
 
+.profile {
+  display: flex;
+  align-items: center;
+  margin-right: 1rem;
+}
+
 .user-image {
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
-  margin-right: 15px;
+  margin-right: 0.75rem;
   object-fit: cover;
 }
 
-/* Add styles for the username and role */
-.profile div {
+.user-info {
   display: flex;
   flex-direction: column;
-  color: var(--text-color);
+  line-height: 1.2;
 }
 
-.profile strong {
+.user-name {
   font-size: 0.9rem;
+  font-weight: 600;
 }
 
-.profile div:last-child {
-  font-size: 0.8rem;
+.user-role {
+  font-size: 0.75rem;
   opacity: 0.8;
+}
+
+.exit-link {
+  white-space: nowrap;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.875rem;
+}
+
+@media (max-width: 991.98px) {
+  .user-profile-container {
+    margin-top: 1rem;
+  }
 }
