@@ -1,46 +1,54 @@
 from flask import Flask, request, jsonify
+import os
+from werkzeug.utils import secure_filename
+from PIL import Image
+import pytesseract
 
 app = Flask(__name__)
 
-nextIdx = 5
-todos = [
-    {
-        "id": 1,
-        "title": "Find a great team",
-    },
-    {
-        "id": 2,
-        "title": "Choose a project",
-    },
-    {
-        "id": 3,
-        "title": "Interview people for need-finding",
-    },
-    {
-        "id": 4,
-        "title": "Come up with a lo-fi prototype",
-    },
-]
+UPLOAD_FOLDER = './uploads'
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
+# Ensure the uploads folder exists
+if not os.path.exists(UPLOAD_FOLDER):
+    os.makedirs(UPLOAD_FOLDER)
 
-@app.get("/api/todos")
-def fetch_todos():
-    global todos
-    return todos
+@app.route('/api/upload', methods=['POST'])
+def upload_file():
+    if 'file' not in request.files:
+        return jsonify({"error": "No file provided"}), 400
+    
+    file = request.files['file']
+    
+    if file.filename == '':
+        return jsonify({"error": "No selected file"}), 400
 
-@app.post("/api/todos")
-def create_todo():
-    global todos, nextIdx
-    content = request.json
-    todos.append({"id": nextIdx, "title": content["title"]})
-    nextIdx += 1
-    return "OK"
+    filename = secure_filename(file.filename)
+    file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+    file.save(file_path)
 
-@app.delete("/api/todos/<int:id>")
-def delete_todo(id):
-    global todos
-    todos = [todo for todo in todos if todo["id"] != int(id)]
-    return "OK"
+    # Process the image to extract text using pytesseract
+    extracted_data = process_image(file_path)
+
+    return jsonify(extracted_data)
+
+def process_image(image_path):
+    try:
+        # Open image and apply pytesseract to extract text
+        img = Image.open(image_path)
+        extracted_text = pytesseract.image_to_string(img)
+
+        # Here you can add logic to parse the extracted text for specific fields
+        # Example logic to simulate extracted fields from the text:
+        return {
+            "name": "Sample Expense",
+            "amount": "100",
+            "date": "2024-10-12",
+            "description": "Description from the bill",
+        }
+
+    except Exception as e:
+        return {"error": str(e)}
 
 if __name__ == "__main__":
     app.run(debug=True)

@@ -254,9 +254,15 @@ function Expenses() {
             </Form>
           )}
 
+          {addOption === 'picture' && (
+            <div>
+              <input type="file" onChange={handleFileChange} accept="image/*" />
+              <Button onClick={handleFileSubmit} className="mt-3 primary-button">Submit Picture</Button>
+            </div>
+          )}
+
           {addOption === 'google-wallet' && <p>Google Wallet integration will be added here.</p>}
           {addOption === 'camera' && <p>Camera functionality will be added here.</p>}
-          {addOption === 'picture' && <p>Picture upload functionality will be added here.</p>}
         </Col>
       </Row>
     </Container>

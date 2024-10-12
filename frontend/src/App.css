@@ -23,24 +23,24 @@
 } */
 
 :root {
-  --primary-color: #006400; /* Dark green for primary color */
-  --hover-color: #4cb60f; /* Dodger blue for hover effects */
-  --secondary-color: #32CD32; /* Lime green for secondary color */
-  --secondary-hover-color: #228B22; /* Forest green for secondary hover */
-  --background-color: #F4F4F4; /* Keep the same background color */
-  --input: #DADADA; /* Keep the same input color */
-  --link: #32CD32; /* Lime green for links */
-  --link-hover: #1E90FF; /* Dodger blue for link hover */
-  --link-dark: #228B22; /* Darker green for dark links */
-  --link-dark-hover: #1E90FF; /* Dodger blue for dark link hover */
-  --text-color: #333333; /* Keep the same text color */
+  --primary-color: #002855; /* Darker navy blue for primary color */
+  --hover-color: #001845; /* Even darker blue for hover effects */
+  --secondary-color: #0466c8; /* Bright blue for secondary color */
+  --secondary-hover-color: #0353a4; /* Darker bright blue for secondary hover */
+  --background-color: #001233; /* Deep navy blue for the background */
+  --input: #33415c; /* Slightly lighter blue for input fields */
+  --link: #0466c8; /* Bright blue for links */
+  --link-hover: #0353a4; /* Darker bright blue for link hover */
+  --link-dark: #023e7d; /* Darker blue for dark links */
+  --link-dark-hover: #002855; /* Primary dark blue for dark link hover */
+  --text-color: #ffffff; /* White text color for readability */
   --warning-color: #FF6B6B; /* Keep the warning color */
-  --warning-hover-color: #CB5353; /* Keep the warning hover color */
-  --edit-color: #98FB98; /* Pale green for edit buttons */
-  --edit-hover-color: #006400; /* Dark green for edit hover */
-  --page-color: #228B22; /* Forest green for page controls */
-  --page-hover-color: #1E90FF; /* Dodger blue for page hover */
-  --breadcrumb: #DADADA; /* Keep the breadcrumb color */
+  --warning-hover-color: #E57373; /* Slightly lighter warning hover color */
+  --edit-color: #5c677d; /* Muted gray-blue for edit buttons */
+  --edit-hover-color: #7d8597; /* Lighter blue-gray for edit hover */
+  --page-color: #023e7d; /* Medium dark blue for page controls */
+  --page-hover-color: #0466c8; /* Bright blue for page hover */
+  --breadcrumb: #979dac; /* Lighter gray-blue for breadcrumb */
 }
 
 body {
