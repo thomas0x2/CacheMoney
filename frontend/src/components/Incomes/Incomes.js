@@ -219,30 +219,22 @@ function Incomes() {
                 {filteredIncomes.map((income) => (
                   <ListGroup.Item key={income.id} className="list-group-item">
                     <div className="expense-details">
-                      {`${income.name} - Amount: CHF${income.amount} - Frequency: ${income.frequency} - Category: ${income.category || "Not specified"}`}
+                      {`${income.name} - Amount: CHF ${income.amount} - Frequency: ${income.frequency} - Category: ${income.category || "Not specified"}`}
                     </div>
                     <div className="button-group">
                       <Button
-                        className="edit"
+                        className="edit-button"
                         size="sm"
                         onClick={() => handleEdit(income)}
                         style={{ marginRight: "5px" }}
                       >
-                        <FontAwesomeIcon
-                          icon={faPenToSquare}
-                          className="icon-left"
-                        />
                         Edit
                       </Button>
                       <Button
-                        variant="danger"
+                        className="edit-button"
                         size="sm"
                         onClick={() => handleRemove(income.id)}
                       >
-                        <FontAwesomeIcon
-                          icon={faTrashCan}
-                          className="icon-left"
-                        />
                         Remove
                       </Button>
                     </div>

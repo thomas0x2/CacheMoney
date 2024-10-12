@@ -9,6 +9,7 @@ import {
   Card,
   InputGroup,
   FormControl,
+  Collapse
 } from "react-bootstrap";
 import TopbarNav from "../TopbarNav/TopbarNav";
 import SidebarNav from "../SidebarNav/SidebarNav";
@@ -25,6 +26,8 @@ import {
   faTrashCan,
   faChevronUp,
   faChevronDown,
+  faCaretUp,
+  faCaretDown,
 } from "@fortawesome/free-solid-svg-icons";
 import {
   Chart as ChartJS,
@@ -54,6 +57,7 @@ function Savings() {
   const [name, setName] = useState("");
   const [category, setCategory] = useState(categories[0]);
   const [amount, setAmount] = useState(0);
+  const [isOpen, setIsOpen] = useState(false);
 
   const handleAddSaving = (e) => {
     e.preventDefault();
@@ -122,71 +126,77 @@ function Savings() {
           />
           <Row className="mt-4">
             <Col md={6}>
-              <Card>
-                <Card.Body>
-                  <Card.Title>Add New Saving</Card.Title>
-                  <Form onSubmit={handleAddSaving}>
-                    <Form.Group className="mb-3">
-                      <Form.Label>Name</Form.Label>
-                      <Form.Control
-                        type="text"
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        required
-                      />
-                    </Form.Group>
-                    <Form.Group className="mb-3">
-                      <Form.Label>Category</Form.Label>
-                      <Form.Select
-                        value={category}
-                        onChange={(e) => setCategory(e.target.value)}
-                        required
-                      >
-                        {categories.map((cat) => (
-                          <option key={cat} value={cat}>
-                            {cat}
-                          </option>
-                        ))}
-                      </Form.Select>
-                    </Form.Group>
-                    <Form.Group className="mb-3">
-                      <Form.Label>Amount (CHF)</Form.Label>
-                      <InputGroup>
-                        <Button
-                          variant="outline-secondary"
-                          onClick={() => handleAmountChange(-0.1)}
-                        >
-                          <FontAwesomeIcon icon={faChevronDown} />
-                        </Button>
-                        <FormControl
-                          type="number"
-                          value={amount.toFixed(2)}
-                          onChange={(e) =>
-                            setAmount(parseFloat(e.target.value))
-                          }
-                          step="0.01"
-                          min="0"
-                          required
-                        />
-                        <Button
-                          variant="outline-secondary"
-                          onClick={() => handleAmountChange(0.1)}
-                        >
-                          <FontAwesomeIcon icon={faChevronUp} />
-                        </Button>
-                      </InputGroup>
-                    </Form.Group>
-                    <Button type="submit" className="mt-3 primary-button">
-                      {"Add Savings"}
-                      <FontAwesomeIcon
-                        icon={faPlusCircle}
-                        className="icon-right"
-                      />
-                    </Button>
-                  </Form>
-                </Card.Body>
-              </Card>
-            </Col>
+                  <Card className="mb-3">
+      <Card.Header 
+        onClick={() => setIsOpen(!isOpen)} 
+        style={{ cursor: 'pointer' }}
+      >
+        <div className="d-flex justify-content-between align-items-center">
+          <span>Add New Saving</span>
+          <FontAwesomeIcon icon={isOpen ? faCaretUp : faCaretDown} />
+        </div>
+      </Card.Header>
+      <Collapse in={isOpen}>
+        <div>
+          <Card.Body>
+            <Form onSubmit={handleAddSaving}>
+              <Form.Group className="mb-3">
+                <Form.Label>Name</Form.Label>
+                <Form.Control
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required
+                />
+              </Form.Group>
+              <Form.Group className="mb-3">
+                <Form.Label>Category</Form.Label>
+                <Form.Select
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value)}
+                  required
+                >
+                  {categories.map((cat) => (
+                    <option key={cat} value={cat}>
+                      {cat}
+                    </option>
+                  ))}
+                </Form.Select>
+              </Form.Group>
+              <Form.Group className="mb-3">
+                <Form.Label>Amount (CHF)</Form.Label>
+                <InputGroup>
+                  <Button
+                    variant="outline-secondary"
+                    onClick={() => handleAmountChange(-0.1)}
+                  >
+                    <FontAwesomeIcon icon={faChevronDown} />
+                  </Button>
+                  <FormControl
+                    type="number"
+                    value={amount.toFixed(2)}
+                    onChange={(e) => setAmount(parseFloat(e.target.value))}
+                    step="0.01"
+                    min="0"
+                    required
+                  />
+                  <Button
+                    variant="outline-secondary"
+                    onClick={() => handleAmountChange(0.1)}
+                  >
+                    <FontAwesomeIcon icon={faChevronUp} />
+                  </Button>
+                </InputGroup>
+              </Form.Group>
+              <Button type="submit" className="mt-3 primary-button">
+                Add Savings
+                <FontAwesomeIcon icon={faPlusCircle} className="icon-right" />
+              </Button>
+            </Form>
+          </Card.Body>
+        </div>
+      </Collapse>
+    </Card>            </Col>
             <Col md={6}>
               <Card>
                 <Card.Body>
