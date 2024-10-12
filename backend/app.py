@@ -259,6 +259,69 @@ def get_monthly_income_last_6_months():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+@app.route('/api/monthly-savings-last6months', methods=['GET'])
+def get_monthly_savings_last_6_months():
+    try:
+        # Get the 'userid' from the query parameters
+        userid = request.args.get('userid')
+
+        if not userid:
+            return jsonify({"error": "Missing 'userid' in query parameters"}), 400
+
+        # Initialize a dictionary to store savings for the last 6 months
+        monthly_savings = {}
+
+        # Get the current date
+        now = datetime.now()
+
+        # Loop through the last 6 months
+        for i in range(6):
+            # Get the first and last days of the current month (offset by i months)
+            current_month = now - relativedelta(months=i)
+            first_day_of_month = datetime(current_month.year, current_month.month, 1)
+            last_day_of_month = datetime(current_month.year, current_month.month, calendar.monthrange(current_month.year, current_month.month)[1])
+
+            # Initialize totals for the month's income and expenses
+            total_monthly_income = 0
+            total_monthly_expenses = 0
+
+            ### Query Firestore for incomes within the current month
+            income_ref = db.collection('users').document(userid).collection('income')
+            income_query = income_ref.where('Date', '>=', first_day_of_month).where('Date', '<=', last_day_of_month)
+            incomes = income_query.stream()
+
+            # Sum up the total income for the current month
+            for income in incomes:
+                income_data = income.to_dict()
+                total_monthly_income += income_data.get('Amount', 0)
+
+            ### Query Firestore for expenses within the current month
+            expenses_ref = db.collection('users').document(userid).collection('expenses')
+            expenses_query = expenses_ref.where('Date', '>=', first_day_of_month).where('Date', '<=', last_day_of_month)
+            expenses = expenses_query.stream()
+
+            # Sum up the total expenses for the current month
+            for expense in expenses:
+                expense_data = expense.to_dict()
+                total_monthly_expenses += expense_data.get('Amount', 0)
+
+            # Calculate monthly savings
+            monthly_savings_value = total_monthly_income - total_monthly_expenses
+
+            # Add the monthly savings to the dictionary
+            month_key = f"{current_month.year}-{current_month.month:02d}"  # E.g., "2024-10"
+            monthly_savings[month_key] = {
+                "income": total_monthly_income,
+                "expenses": total_monthly_expenses,
+                "savings": monthly_savings_value
+            }
+
+        # Return the aggregated monthly savings for the last 6 months
+        return jsonify(monthly_savings), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 @app.route('/api/all_incomes', methods=['GET'])
 def get_all_incomes():
     try:
