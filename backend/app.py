@@ -4,7 +4,7 @@ from flask_cors import CORS  # Import CORS
 import firebase_admin
 from firebase_admin import credentials, firestore
 import datetime
-from google.cloud.firestore import Timestamp
+from google.protobuf.timestamp_pb2 import Timestamp 
 
 import os
 from werkzeug.utils import secure_filename
@@ -33,6 +33,8 @@ def get_last_7_days_expenses():
         # Get the 'userid' from the request arguments (URL query params)
         userid = request.args.get('userid')
 
+        print(userid)
+
         if not userid:
             return jsonify({"error": "Missing 'userid' in query parameters"}), 400
 
@@ -40,13 +42,17 @@ def get_last_7_days_expenses():
         now = datetime.datetime.now()
         seven_days_ago = now - datetime.timedelta(days=7)
 
-        # Convert the date to Firestore Timestamp
-        seven_days_ago_timestamp = Timestamp(seven_days_ago, 0)
+        # Create a Firestore Timestamp from the Python datetime object
+        seven_days_ago_timestamp = Timestamp()
+        seven_days_ago_timestamp.FromDatetime(seven_days_ago)
 
         # Query Firestore for expenses in the last 7 days
         expenses_ref = db.collection('users').document(userid).collection('expenses')
+
+        print(expenses_ref)
         query = expenses_ref.where('Date', '>=', seven_days_ago_timestamp).order_by('Date', direction=firestore.Query.DESCENDING)
         expenses = query.stream()
+
 
         # Collect the results into a list
         expenses_list = []
