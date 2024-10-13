@@ -14,8 +14,24 @@ import "./App.css";
 const GlobalContext = createContext();
 
 export const GlobalProvider = ({ children }) => {
-  const [savingTarget, setSavingTarget] = useState(0);
+  const [savingTarget, setSavingTarget] = useState(3000);
   const [totalSavings, setTotalSavings] = useState(0);
+
+  // Persist savingTarget to localStorage
+  useEffect(() => {
+    const savedTarget = localStorage.getItem("savingTarget");
+    if (savedTarget) {
+      setSavingTarget(parseFloat(savedTarget));
+    } else {
+      setSavingTarget(3000); // Default to 3000 CHF
+      localStorage.setItem("savingTarget", "3000");
+    }
+  }, []);
+
+  // Update localStorage whenever savingTarget changes
+  useEffect(() => {
+    localStorage.setItem("savingTarget", savingTarget.toString());
+  }, [savingTarget]);
 
   return (
     <GlobalContext.Provider value={{ savingTarget, setSavingTarget, totalSavings, setTotalSavings }}>

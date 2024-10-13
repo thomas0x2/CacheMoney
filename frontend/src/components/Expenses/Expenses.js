@@ -257,28 +257,32 @@ function Expenses() {
         } else {
           console.log('File successfully submitted. Extracted data:', data);
   
-          // Fallback for date: if invalid, use today's date
+          // Parse the date
           let parsedDate = new Date(data.date);
           if (isNaN(parsedDate.getTime())) {
             console.warn('Invalid date, using today\'s date as fallback.');
-            parsedDate = new Date(); // Use current date if invalid
+            parsedDate = new Date();
           }
-  
-          // Fallback for category: if missing, use a default category
-          const category = data.category || 'Uncategorized';
   
           const newExpense = {
             id: Date.now(),
-            name: data.name,
-            amount: parseAmount(data.amount),
-            date: parsedDate.toISOString().split("T")[0], // Use ISO format
-            description: data.description,
-            category: category,
+            name: data.name || 'Unnamed Expense',
+            amount: parseFloat(data.amount) || 0,
+            date: parsedDate.toISOString().split('T')[0],
+            description: data.description || '',
+            category: data.category || 'Uncategorized',
           };
   
-          setExpenses(prevExpenses => [newExpense, ...prevExpenses]); // Add to top of the list
+          console.log('New expense object:', newExpense);
+  
+          setExpenses(prevExpenses => {
+            const updatedExpenses = [newExpense, ...prevExpenses];
+            console.log('Updated expenses:', updatedExpenses);
+            return updatedExpenses;
+          });
+
           setSuccessMessage("Expense added successfully!");
-          setFile(null); // Reset file input
+          setFile(null);
         }
       })
       .catch(error => {
@@ -286,7 +290,6 @@ function Expenses() {
         setErrorMessage('Error during file submission: ' + error.message);
       });
   };
-  
 
   const startCamera = () => {
     navigator.mediaDevices
@@ -632,36 +635,36 @@ function Expenses() {
                 </DropdownButton>
               </div>
 
-                <Table striped bordered hover className="styled-expense-table">
-                <thead>
-                  <tr>
-                    <th>Date</th>
-                    <th>Name</th>
-                    <th>Category</th>
-                    <th>Description</th>
-                    <th>Amount</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {expenses.length > 0 ? (
-                    expenses.map((expense, index) => (
-                      <tr key={index}>
-                        <td>{formatDate(expense.date)}</td>
-                        <td>{expense.name}</td> {/* Make sure `name` exists in your expense data */}
-                        <td>{expense.category}</td>
-                        <td>{expense.description}</td>
-                        <td>CHF {expense.amount.toFixed(2)}</td>
-                      </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td colSpan="5" className="text-center">
-                        No expenses found for the selected time range.
-                      </td>
+              <Table striped bordered hover className="styled-expense-table">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Name</th>
+                  <th>Category</th>
+                  <th>Description</th>
+                  <th>Amount</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredExpenses.length > 0 ? (
+                  filteredExpenses.map((expense, index) => (
+                    <tr key={expense.id || index}>
+                      <td>{formatDate(expense.date)}</td>
+                      <td>{expense.name}</td>
+                      <td>{expense.category}</td>
+                      <td>{expense.description}</td>
+                      <td>CHF {parseFloat(expense.amount).toFixed(2)}</td>
                     </tr>
-                  )}
-                </tbody>
-              </Table>  
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="5" className="text-center">
+                      No expenses found for the selected time range.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </Table>
             </Col>
           </Row>
         </Col>

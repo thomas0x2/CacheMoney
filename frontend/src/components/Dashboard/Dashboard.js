@@ -18,7 +18,7 @@ import { motion } from "framer-motion";
 import { UserContext } from "../Auth/UserContext"; // Import UserContext
 
 function Dashboard({
-  monthlyTarget = 400,
+  monthlyTarget = 500,
 }) {
   const [timeRange, setTimeRange] = useState("7 Days");
   const [expenses, setExpenses] = useState([]);
