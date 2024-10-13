@@ -1,13 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { ListGroup, Container, Row, Col, Card, Button } from "react-bootstrap";
+import { Container, Row, Col, Card } from "react-bootstrap";
 import TopbarNav from "../TopbarNav/TopbarNav";
-import SidebarNav from "../SidebarNav/SidebarNav";
 import BreadcrumbAndProfile from "../BreadcrumbAndProfile/BreadcrumbAndProfile";
-import { Line } from "react-chartjs-2";
-import "chartjs-adapter-date-fns";
-import AddSavings from "./AddSavings";
 import SavingsSetup from "./SavingsSetup";
-import { useGlobalContext } from "../../App"; 
+import { useGlobalContext } from "../../App";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -26,7 +22,7 @@ ChartJS.register(
   LineElement,
   Title,
   Tooltip,
-  Legend,
+  Legend
 );
 
 const categories = [
@@ -54,132 +50,129 @@ const categories = [
 ];
 
 function ProgressRing({ progress, text, currentSavings, savingsTarget }) {
-  const radius = 35;
-  const strokeWidth = 8; // Increased stroke width for thicker rings
+  const radius = 60; // Increased radius for a bigger ring
+  const strokeWidth = 10; // Increased stroke width for better visibility
   const normalizedRadius = radius - strokeWidth / 2;
   const circumference = 2 * Math.PI * normalizedRadius;
   const fillPercentage = Math.min(Math.max(progress, 0), 1);
   const fillOffset = circumference * (1 - fillPercentage);
 
   return (
-    <div className="text-center">
-      <svg width="90" height="90" viewBox="0 0 90 90">
+    <div className="text-center ring-container">
+      <svg width="150" height="150" viewBox="0 0 150 150">
+        <defs>
+          <linearGradient id="gradient">
+            <stop offset="0%" stopColor="#00BFFF" />
+            <stop offset="100%" stopColor="#1E90FF" />
+          </linearGradient>
+        </defs>
         <circle
-          cx="45"
-          cy="45"
+          cx="75"
+          cy="75"
           r={normalizedRadius}
           fill="transparent"
-          stroke="#A9A9A9"
+          stroke="#e6e6e6"
           strokeWidth={strokeWidth}
         />
         <circle
-          cx="45"
-          cy="45"
+          cx="75"
+          cy="75"
           r={normalizedRadius}
           fill="transparent"
-          stroke="#00008B"
+          stroke="url(#gradient)"
           strokeWidth={strokeWidth}
           strokeDasharray={circumference}
           strokeDashoffset={fillOffset}
-          transform="rotate(-90 45 45)"
-        />
+          strokeLinecap="round"
+          transform="rotate(-90 75 75)"
+        >
+          <animate
+            attributeName="stroke-dashoffset"
+            from={circumference}
+            to={fillOffset}
+            dur="1s"
+            fill="freeze"
+          />
+        </circle>
+        <text
+          x="50%"
+          y="50%"
+          dominantBaseline="middle"
+          textAnchor="middle"
+          fontSize="18px"
+          fill="#333"
+        >
+          {`${(fillPercentage * 100).toFixed(0)}%`}
+        </text>
       </svg>
-      <p className="mt-2">{text}</p>
+      <p className="mt-2 ring-text">{text}</p>
       <p className="text-muted">
         {currentSavings.toFixed(2)}/{savingsTarget.toFixed(2)} CHF
       </p>
-      <p className="text-muted">{(fillPercentage * 100).toFixed(0)}%</p>
     </div>
   );
 }
 
 function Savings() {
-  const [savingsEntries, setSavingsEntries] = useState([]);
   const [savingsPlan, setSavingsPlan] = useState([]);
   const [currentSavings, setCurrentSavings] = useState({});
+  const [loading, setLoading] = useState(true);
 
-  // Use the global context
   const { savingTarget, setSavingTarget, totalSavings, setTotalSavings } = useGlobalContext();
 
   useEffect(() => {
-    // Load saved plan and savings entries from local storage when component mounts
-    const savedPlan = localStorage.getItem("savingsPlan");
-    const savedEntries = localStorage.getItem("savingsEntries");
+    const fetchSavingsData = async () => {
+      try {
+        const savingsResponse = await fetch(`/api/monthly-savings-last6months?userid=YuwRGr2aNKQMu4LCN3sZcGNqg8g2`);
+        const savingsData = await savingsResponse.json();
 
-    if (savedPlan) {
-      const parsedPlan = JSON.parse(savedPlan);
-      setSavingsPlan(parsedPlan);
-      const initialTotal = parsedPlan.reduce(
-        (sum, category) => sum + (category.savingsTarget || 0),
-        0,
-      );
-      setSavingTarget(initialTotal); // Update global saving target
-    }
-    if (savedEntries) {
-      const parsedEntries = JSON.parse(savedEntries);
-      setSavingsEntries(parsedEntries);
-      updateCurrentSavings(parsedEntries);
-    }
-  }, [setSavingTarget]);
+        console.log("Last 6 months savings data: ", savingsData);
 
-  const updateCurrentSavings = (entries) => {
-    const savingsByMonth = entries.reduce((acc, entry) => {
-      const date = new Date(entry.date);
-      const monthYear = `${date.getMonth() + 1}/${date.getFullYear()}`;
-      acc[monthYear] = (acc[monthYear] || 0) + entry.amount;
-      return acc;
-    }, {});
-    setCurrentSavings(savingsByMonth);
+        const last3Months = Object.keys(savingsData).sort().slice(-3);
+        console.log("Last 3 months: ", last3Months);
 
-    const newTotalSavings = Object.values(savingsByMonth).reduce((sum, value) => sum + value, 0);
-    setTotalSavings(newTotalSavings); // Update global total savings
-  };
+        const savingsByMonth = last3Months.reduce((acc, month) => {
+          if (savingsData[month]?.income !== undefined && savingsData[month]?.expenses !== undefined) {
+            acc[month] = savingsData[month].income - savingsData[month].expenses;
+          } else {
+            acc[month] = 0; // Default to 0 if data is missing
+          }
+          return acc;
+        }, {});
+        setCurrentSavings(savingsByMonth);
 
-  const handleAddSaving = (newSaving) => {
-    setSavingsEntries((prevEntries) => {
-      const updatedEntries = [newSaving, ...prevEntries];
-      localStorage.setItem("savingsEntries", JSON.stringify(updatedEntries));
-      updateCurrentSavings(updatedEntries);
-      return updatedEntries;
-    });
-  };
+        const summaryResponse = await fetch(`/api/financial_summary?userid=YuwRGr2aNKQMu4LCN3sZcGNqg8g2`);
+        const summaryData = await summaryResponse.json();
 
-  const handleSavingsPlanChange = (newPlan) => {
-    setSavingsPlan(newPlan);
-    const newTotal = newPlan.reduce(
-      (sum, category) => sum + (category.savingsTarget || 0),
-      0,
-    );
-    setSavingTarget(newTotal); // Update global saving target
-    localStorage.setItem("savingsPlan", JSON.stringify(newPlan));
-  };
+        console.log("Financial summary data: ", summaryData);
 
-  const handleEdit = (entry) => {
-    // TODO: Implement edit functionality
-    console.log("Edit entry:", entry);
-  };
+        const totalIncome = summaryData.total_income ?? 0;
+        const totalExpenses = summaryData.total_expenses ?? 0;
+        const calculatedSavings = totalIncome - totalExpenses;
+        setTotalSavings(calculatedSavings);
 
-  const handleRemove = (entryId) => {
-    setSavingsEntries((prevEntries) => {
-      const updatedEntries = prevEntries.filter(
-        (entry) => entry.id !== entryId,
-      );
-      localStorage.setItem("savingsEntries", JSON.stringify(updatedEntries));
-      updateCurrentSavings(updatedEntries);
-      return updatedEntries;
-    });
-  };
+        setLoading(false);
+      } catch (error) {
+        console.error("Error fetching savings data:", error);
+        setLoading(false);
+      }
+    };
+
+    fetchSavingsData();
+  }, [setTotalSavings]);
 
   const getRingData = () => {
+    if (loading) return [];
+
     const currentDate = new Date();
     const last3Months = Array.from({ length: 3 }, (_, i) => {
       const d = new Date(currentDate.getFullYear(), currentDate.getMonth() - i, 1);
-      return `${d.getMonth() + 1}/${d.getFullYear()}`;
+      return `${d.getFullYear()}-${(d.getMonth() + 1).toString().padStart(2, '0')}`;
     });
 
     const monthlyRings = last3Months.map((monthYear) => ({
       text: monthYear,
-      progress: (currentSavings[monthYear] || 0) / (savingTarget / 12), // Assuming monthly target is annual target divided by 12
+      progress: currentSavings[monthYear] ? currentSavings[monthYear] / (savingTarget / 12) : 0,
       currentSavings: currentSavings[monthYear] || 0,
       savingsTarget: savingTarget / 12,
     }));
@@ -210,11 +203,11 @@ function Savings() {
               { name: "Savings", path: "/savings", active: true },
             ]}
           />
-          
+
           {/* Rings section */}
-          <Row className="mt-4 mb-4">
+          <Row className="mt-4 mb-4 justify-content-center">
             {getRingData().map((ring, index) => (
-              <Col key={index} xs={6} sm={3}>
+              <Col key={index} xs={12} sm={6} md={3} lg={2} className="mb-4">
                 <ProgressRing 
                   progress={ring.progress} 
                   text={ring.text} 
@@ -225,46 +218,22 @@ function Savings() {
             ))}
           </Row>
 
+          {/* Removed the Recent Savings and Add Savings sections */}
+
           <Row className="mt-4">
             <Col md={6}>
               <SavingsSetup 
                 savingsPlan={savingsPlan} 
-                onSavingsPlanChange={handleSavingsPlanChange}
+                onSavingsPlanChange={(newPlan) => {
+                  setSavingsPlan(newPlan);
+                  const newTotal = newPlan.reduce(
+                    (sum, category) => sum + (category.savingsTarget || 0),
+                    0
+                  );
+                  setSavingTarget(newTotal);
+                  localStorage.setItem("savingsPlan", JSON.stringify(newPlan));
+                }}
               />
-            </Col>
-            <Col md={6}>
-              <Card>
-                <Card.Body>
-                  <Card.Title>Recent Savings</Card.Title>
-                  <ListGroup>
-                    {savingsEntries.slice(0, 5).map((entry) => (
-                      <ListGroup.Item key={entry.id} className="d-flex justify-content-between align-items-center">
-                        <div>
-                          <strong>{entry.name}</strong> ({entry.category}) - CHF{" "}
-                          {entry.amount.toFixed(2)}
-                        </div>
-                        <div className="button-group">
-                          <Button
-                            className="edit-button"
-                            size="sm"
-                            onClick={() => handleEdit(entry)}
-                            style={{ marginRight: "5px" }}
-                          >
-                            Edit
-                          </Button>
-                          <Button
-                            className="edit-button"
-                            size="sm"
-                            onClick={() => handleRemove(entry.id)}
-                          >
-                            Remove
-                          </Button>
-                        </div>
-                      </ListGroup.Item>
-                    ))}
-                  </ListGroup>
-                </Card.Body>
-              </Card>
             </Col>
           </Row>
         </Col>

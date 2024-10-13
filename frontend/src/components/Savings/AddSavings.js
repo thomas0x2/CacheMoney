@@ -37,6 +37,7 @@ function AddSavings({ onAddSaving }) {
     setName("");
     setCategory(categories[0]);
     setAmount(0);
+    setIsOpen(false); // Close the form after adding
   };
 
   const handleAmountChange = (increment) => {

@@ -538,7 +538,7 @@ def process_image(image_path):
                         Extract the following information from the provided image of a bill:
                         1. Total price or total amount of expense as a number!
                         2. Name of the expense
-                        3. Date of the bill
+                        3. Date of the bill in the format "YYYY-MM-DD"
                         4. A short description of the expense
                         5. Category of the bill with the options: ['Utility', 'Rent', 'Groceries', 'Entertainment', 'Other']
 

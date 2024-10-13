@@ -1,21 +1,18 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Button, Form, Container, Row, Col, Card, InputGroup, FormControl, Spinner, Table, DropdownButton, Dropdown } from 'react-bootstrap';
+import React, { useState, useEffect, useRef, useContext } from 'react';
+import { Button, Form, Container, Row, Col, InputGroup, FormControl, Spinner, Table, DropdownButton, Dropdown } from 'react-bootstrap';
 import TopbarNav from '../TopbarNav/TopbarNav';
 import BreadcrumbAndProfile from '../BreadcrumbAndProfile/BreadcrumbAndProfile';
 import * as XLSX from 'xlsx';
-import { Chart as ChartJS } from 'chart.js/auto';
-import { Line } from 'react-chartjs-2';
-import 'chartjs-adapter-date-fns';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faFileExcel, faPlusCircle, faCamera, faImage, faUpload } from "@fortawesome/free-solid-svg-icons";
+import { faPlusCircle, faCamera, faImage, faUpload } from "@fortawesome/free-solid-svg-icons";
 import { motion } from 'framer-motion';
 import InfoCard from "../InfoCard/InfoCard";
+import { UserContext } from "../Auth/UserContext"; // Import UserContext
 
 function Expenses() {
-  const [expenses, setExpenses] = useState(() => {
-    const savedExpenses = localStorage.getItem("expenses");
-    return savedExpenses ? JSON.parse(savedExpenses) : [];
-  });
+  const [expenses, setExpenses] = useState([]);
+  const [monthlySavings, setMonthlySavings] = useState(0);
+  const [monthlyExpense, setMonthlyExpense] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
   const [expense, setExpense] = useState({
     name: '',
@@ -39,14 +36,96 @@ function Expenses() {
   const videoRef = useRef(null); // Ref for video element to show camera stream
   const canvasRef = useRef(null); // Ref for canvas to capture image from video
 
+  const user = useContext(UserContext);
+
   useEffect(() => {
-    localStorage.setItem("expenses", JSON.stringify(expenses));
-  }, [expenses]);
+    // Fetch expenses and savings data from APIs
+    const fetchExpenseAndSavingsData = async () => {
+      try {
+        // Fetch expenses for the last 6 months
+        const expenseResponse = await fetch(`/api/monthly-savings-last6months?userid=YuwRGr2aNKQMu4LCN3sZcGNqg8g2`);
+        const expenseData = await expenseResponse.json();
+        console.log("Expense data for the last 6 months: ", expenseData);
+
+        // Sort the months and get the most recent one
+        const sortedMonths = Object.keys(expenseData).sort();
+        const latestMonth = sortedMonths.pop();
+        console.log("Latest month: ", latestMonth);
+
+        const latestMonthData = expenseData[latestMonth];
+        setMonthlyExpense(latestMonthData.expenses);
+        setMonthlySavings(latestMonthData.income - latestMonthData.expenses); // Calculate savings manually
+
+        // Fetch total financial summary
+        const summaryResponse = await fetch(`/api/financial_summary?userid=YuwRGr2aNKQMu4LCN3sZcGNqg8g2`);
+        const summaryData = await summaryResponse.json();
+        console.log("Financial summary data: ", summaryData);
+        setTotalSavings(summaryData.total_income - summaryData.total_expenses); // Set total savings
+
+        // Prepare expenses for the table
+        const expensesForTable = sortedMonths.reduce((acc, month) => {
+          const monthData = expenseData[month];
+          acc.push({
+            date: month,
+            amount: monthData.expenses,
+            category: "Monthly Expenses",
+            description: `Expenses for ${month}`
+          });
+          return acc;
+        }, []);
+        setExpenses(expensesForTable);
+
+      } catch (error) {
+        console.error("Error fetching expenses or savings data:", error);
+      }
+    };
+
+    fetchExpenseAndSavingsData();
+  }, []);
+
+  useEffect(() => {
+    const fetchExpenses = async () => {
+      setIsLoading(true);
+      setErrorMessage(null);
+      try {
+        let endpoint;
+        switch (timeRange) {
+          case "24 Hours":
+            endpoint = `/api/expense/last24hours?userid=${user.uid}`;
+            break;
+          case "7 Days":
+            endpoint = `/api/expense/last7days?userid=${user.uid}`;
+            break;
+          default:
+            endpoint = `/api/expense/last30days?userid=${user.uid}`;
+        }
+  
+        const response = await fetch(endpoint);
+        if (!response.ok) {
+          throw new Error('Failed to fetch expenses');
+        }
+        const data = await response.json();
+        setExpenses(data.expenses); // Make sure `expenses` is the correct key from the API response
+      } catch (err) {
+        setErrorMessage(err.message);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+  
+    fetchExpenses();
+  }, [timeRange, user.uid]);
+  
 
   // Helper to parse amount correctly
   const parseAmount = (amount) => {
     return parseFloat(amount) || 0;
   };
+
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+  };  
 
   const exportToExcel = () => {
     const ws = XLSX.utils.json_to_sheet(expenses);
@@ -114,12 +193,7 @@ function Expenses() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (
-      !expense.name ||
-      !expense.amount ||
-      !expense.date ||
-      !expense.category
-    ) {
+    if (!expense.name || !expense.amount || !expense.date) {
       alert("All fields are required, including the category.");
       return;
     }
@@ -130,6 +204,8 @@ function Expenses() {
       id: editing ? currentExpense.id : Date.now()
     };
 
+    setMonthlyExpense(monthlyExpense + newExpense.amount);
+
     if (editing) {
       setExpenses(
         expenses.map((exp) => (exp.id === currentExpense.id ? newExpense : exp))
@@ -138,13 +214,13 @@ function Expenses() {
       setExpenses([...expenses, newExpense]);
     }
 
+    
+
     resetForm();
   };
 
   const handleRemove = (id) => {
-    const isConfirmed = window.confirm(
-      "Are you sure you want to remove this expense?"
-    );
+    const isConfirmed = window.confirm("Are you sure you want to remove this expense?");
     if (isConfirmed) {
       setExpenses(expenses.filter((exp) => exp.id !== id));
     }
@@ -154,52 +230,63 @@ function Expenses() {
     const selectedFile = event.target.files[0];
     setFile(selectedFile); // Set the selected file in state
     console.log('File selected:', selectedFile); // Debugging to ensure file is selected
-};
+  };
 
-const handleFileSubmit = () => {
-  if (!file) {
+  const handleFileSubmit = () => {
+    if (!file) {
       alert('Please select a file before submitting.');
       return;
-  }
-
-  const formData = new FormData();
-  formData.append('file', file);
-
-  setIsLoading(true);
-  setErrorMessage(null);
-  setSuccessMessage(null);
-
-  fetch('/api/upload', {
+    }
+  
+    const formData = new FormData();
+    formData.append('file', file);
+  
+    setIsLoading(true);
+    setErrorMessage(null);
+    setSuccessMessage(null);
+  
+    fetch('/api/upload', {
       method: 'POST',
       body: formData,
-  })
-  .then(response => response.json())
-  .then(data => {
-      setIsLoading(false);
-      if (data.error) {
+    })
+      .then(response => response.json())
+      .then(data => {
+        setIsLoading(false);
+        if (data.error) {
           setErrorMessage(data.error);
-      } else {
+        } else {
           console.log('File successfully submitted. Extracted data:', data);
-
+  
+          // Fallback for date: if invalid, use today's date
+          let parsedDate = new Date(data.date);
+          if (isNaN(parsedDate.getTime())) {
+            console.warn('Invalid date, using today\'s date as fallback.');
+            parsedDate = new Date(); // Use current date if invalid
+          }
+  
+          // Fallback for category: if missing, use a default category
+          const category = data.category || 'Uncategorized';
+  
           const newExpense = {
-              id: Date.now(),
-              name: data.name,
-              amount: parseAmount(data.amount),
-              date: data.date,
-              description: data.description,
-              category: data.category,
+            id: Date.now(),
+            name: data.name,
+            amount: parseAmount(data.amount),
+            date: parsedDate.toISOString().split("T")[0], // Use ISO format
+            description: data.description,
+            category: category,
           };
-
-          setExpenses(prevExpenses => [...prevExpenses, newExpense]);
+  
+          setExpenses(prevExpenses => [newExpense, ...prevExpenses]); // Add to top of the list
           setSuccessMessage("Expense added successfully!");
           setFile(null); // Reset file input
-      }
-  })
-  .catch(error => {
-      setIsLoading(false);
-      setErrorMessage('Error during file submission: ' + error.message);
-  });
-};
+        }
+      })
+      .catch(error => {
+        setIsLoading(false);
+        setErrorMessage('Error during file submission: ' + error.message);
+      });
+  };
+  
 
   const startCamera = () => {
     navigator.mediaDevices
@@ -275,7 +362,7 @@ const handleFileSubmit = () => {
   const getFilteredExpenses = () => {
     const now = new Date();
     const cutoffDate = new Date(now.getTime() - (timeRange === '24 Hours' ? 24 * 60 * 60 * 1000 : 7 * 24 * 60 * 60 * 1000));
-    
+
     return expenses.filter(expense => {
       const expenseDate = new Date(expense.date);
       return expenseDate >= cutoffDate && expenseDate <= now;
@@ -301,7 +388,7 @@ const handleFileSubmit = () => {
             ]}
           />
 
-          {/* Display Total Expenses and Total Savings */}
+          {/* Display Monthly Expense and Monthly Savings */}
           <Row className="mb-4">
             <Col md={6}>
               <motion.div
@@ -310,8 +397,8 @@ const handleFileSubmit = () => {
                 transition={{ duration: 0.5, delay: 0.3 }}
               >
                 <InfoCard
-                  title="Total Expense"
-                  value={`CHF ${totalExpense.toFixed(2)}`}
+                  title="Monthly Expense"
+                  value={`CHF ${monthlyExpense.toFixed(2)}`}
                 />
               </motion.div>
             </Col>
@@ -322,16 +409,12 @@ const handleFileSubmit = () => {
                 transition={{ duration: 0.5, delay: 0.4 }}
               >
                 <InfoCard
-                  title="Total Savings"
-                  value={`CHF ${totalSavings.toFixed(2)}`}
+                  title="Monthly Savings"
+                  value={`CHF ${monthlySavings.toFixed(2)}`}
                 />
               </motion.div>
             </Col>
           </Row>
-
-          {/* Show loading spinner or error message */}
-          {/* {isLoading && <div><Spinner animation="border" /> Submitting...</div>}
-          {errorMessage && <div className="text-danger">{errorMessage}</div>} */}
 
           {/* Buttons for different add expense options */}
           <div className="d-flex justify-content-between mt-4 mb-3 button-group">
@@ -533,7 +616,6 @@ const handleFileSubmit = () => {
           {successMessage && <div className="text-success mt-3">{successMessage}</div>}
           {errorMessage && <div className="text-danger mt-3">{errorMessage}</div>}
 
-
           {/* Table to display the expenses */}
           <Row className="mb-5 mt-4">
             <Col md={12} className="expense-tracker">
@@ -549,43 +631,37 @@ const handleFileSubmit = () => {
                   <Dropdown.Item eventKey="7 Days">Last 7 Days</Dropdown.Item>
                 </DropdownButton>
               </div>
-              
-              {/* Search bar moved above the table */}
-              <InputGroup className="mb-3">
-                <FormControl
-                  placeholder="Search expenses..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-              </InputGroup>
-              <Table striped bordered hover className="styled-expense-table">
+
+                <Table striped bordered hover className="styled-expense-table">
                 <thead>
                   <tr>
                     <th>Date</th>
+                    <th>Name</th>
                     <th>Category</th>
                     <th>Description</th>
                     <th>Amount</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredExpenses.length > 0 ? (
-                    filteredExpenses.map((expense, index) => (
+                  {expenses.length > 0 ? (
+                    expenses.map((expense, index) => (
                       <tr key={index}>
-                        <td>{expense.date}</td>
+                        <td>{formatDate(expense.date)}</td>
+                        <td>{expense.name}</td> {/* Make sure `name` exists in your expense data */}
                         <td>{expense.category}</td>
                         <td>{expense.description}</td>
-                        <td>{expense.amount.toFixed(2)} CHF</td>
+                        <td>CHF {expense.amount.toFixed(2)}</td>
                       </tr>
                     ))
                   ) : (
                     <tr>
-                      <td colSpan="4" className="text-center">
+                      <td colSpan="5" className="text-center">
                         No expenses found for the selected time range.
                       </td>
                     </tr>
                   )}
                 </tbody>
-              </Table>
+              </Table>  
             </Col>
           </Row>
         </Col>

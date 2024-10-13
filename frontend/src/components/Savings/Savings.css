@@ -1,11 +1,36 @@
-.ring-col svg {
-  margin-bottom: 10px;
+/* Savings.css */
+
+/* Style for the ring container */
+.ring-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
-.ring-col p {
-  margin-bottom: 5px;
+/* Adjust text below the ring */
+.ring-text {
+  font-weight: bold;
+  font-size: 1.1em;
 }
 
-.ring-col .text-muted {
-  font-size: 0.8em;
+/* Adjust muted text */
+.ring-container .text-muted {
+  font-size: 0.9em;
+}
+
+/* Optional: Add some hover effects or shadows to the rings */
+.ring-container svg {
+  transition: transform 0.3s ease;
+}
+
+.ring-container svg:hover {
+  transform: scale(1.05);
+}
+
+/* Responsive adjustments */
+@media (max-width: 576px) {
+  .ring-container svg {
+    width: 120px;
+    height: 120px;
+  }
 }
