@@ -5,12 +5,7 @@ import { getAuth } from "firebase/auth";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: ",
-  authDomain: "cachemoney-95b14.firebaseapp.com",
-  projectId: "cachemoney-95b14",
-  storageBucket: "cachemoney-95b14.appspot.com",
-  messagingSenderId: "610421834160",
-  appId: "1:610421834160:web:4c8a93de0e605102db5675",
+
 };
 
 // Initialize Firebase
