@@ -1,0 +1,7 @@
+/* Assistant.css */
+.assistant-container {
+    background-color: white !important; /* Override global background color */
+    min-height: 100vh; /* Make sure it covers the full height of the viewport */
+    /* padding: 20px; Optional padding */
+  }
+  
